@@ -1,111 +1,94 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-const Ctx = createContext(null)
+const Ctx = createContext({ user: null, profile: null, loading: true, isAdmin: false })
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
-  const [ready, setReady] = useState(false)
-
-  async function fetchProfile(u) {
-    try {
-      const { data } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', u.id)
-        .maybeSingle()
-      if (!data) {
-        const p = { id: u.id, email: u.email, full_name: u.user_metadata?.full_name || '', role: 'customer' }
-        await supabase.from('users').upsert(p)
-        setProfile(p)
-      } else {
-        setProfile(data)
-      }
-    } catch (e) {
-      // Fallback to auth metadata if DB fails
-      setProfile({
-        id: u.id,
-        email: u.email,
-        full_name: u.user_metadata?.full_name || '',
-        role: 'customer'
-      })
-    }
-  }
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Hard timeout - never spin more than 5 seconds
-    const timeout = setTimeout(() => setReady(true), 5000)
+    // Absolute fallback — stop loading after 5 seconds no matter what
+    const fallback = window.setTimeout(() => setLoading(false), 5000)
 
-    async function boot() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user) {
-          setUser(session.user)
-          await fetchProfile(session.user)
-        }
-      } catch (e) {
-        console.warn('Auth boot error:', e)
-      } finally {
-        clearTimeout(timeout)
-        setReady(true)
-      }
-    }
-
-    boot()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+    supabase.auth.getSession().then(function(result) {
+      var session = result.data && result.data.session
+      if (session && session.user) {
         setUser(session.user)
-        await fetchProfile(session.user)
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null)
-        setProfile(null)
+        supabase.from('users').select('*').eq('id', session.user.id).maybeSingle().then(function(r) {
+          if (r.data) setProfile(r.data)
+          else setProfile({ id: session.user.id, email: session.user.email, full_name: session.user.user_metadata && session.user.user_metadata.full_name || '', role: 'customer' })
+          window.clearTimeout(fallback)
+          setLoading(false)
+        }).catch(function() {
+          setProfile({ id: session.user.id, email: session.user.email, role: 'customer' })
+          window.clearTimeout(fallback)
+          setLoading(false)
+        })
+      } else {
+        window.clearTimeout(fallback)
+        setLoading(false)
       }
+    }).catch(function() {
+      window.clearTimeout(fallback)
+      setLoading(false)
     })
 
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(timeout)
+    var listener = supabase.auth.onAuthStateChange(function(event, session) {
+      if (event === 'SIGNED_OUT') { setUser(null); setProfile(null) }
+    })
+
+    return function() {
+      window.clearTimeout(fallback)
+      listener.data.subscription.unsubscribe()
     }
   }, [])
 
-  const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) throw error
-    setUser(data.user)
-    await fetchProfile(data.user)
-    return data
-  }
-
-  const signUp = async (email, password, name, phone) => {
-    const { data, error } = await supabase.auth.signUp({
-      email, password,
-      options: { data: { full_name: name } }
+  function signIn(email, password) {
+    return supabase.auth.signInWithPassword({ email: email, password: password }).then(function(r) {
+      if (r.error) throw r.error
+      setUser(r.data.user)
+      return supabase.from('users').select('*').eq('id', r.data.user.id).maybeSingle().then(function(pr) {
+        setProfile(pr.data || { id: r.data.user.id, email: email, role: 'customer' })
+        return r.data
+      })
     })
-    if (error) throw error
-    if (data.user) {
-      const p = { id: data.user.id, email, full_name: name, phone, role: 'customer' }
-      await supabase.from('users').upsert(p)
-      setUser(data.user)
-      setProfile(p)
-    }
-    return data
   }
 
-  const signOut = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    setProfile(null)
+  function signUp(email, password, name, phone) {
+    return supabase.auth.signUp({ email: email, password: password, options: { data: { full_name: name } } }).then(function(r) {
+      if (r.error) throw r.error
+      if (r.data.user) {
+        var p = { id: r.data.user.id, email: email, full_name: name, phone: phone, role: 'customer' }
+        supabase.from('users').upsert(p)
+        setUser(r.data.user)
+        setProfile(p)
+      }
+      return r.data
+    })
   }
 
-  const isAdmin = profile?.role === 'admin'
+  function signOut() {
+    return supabase.auth.signOut().then(function() {
+      setUser(null)
+      setProfile(null)
+    })
+  }
 
   return (
-    <Ctx.Provider value={{ user, profile, ready, isAdmin, signIn, signUp, signOut }}>
+    <Ctx.Provider value={{
+      user: user,
+      profile: profile,
+      loading: loading,
+      isAdmin: profile && profile.role === 'admin',
+      signIn: signIn,
+      signUp: signUp,
+      signOut: signOut
+    }}>
       {children}
     </Ctx.Provider>
   )
 }
 
-export const useAuth = () => useContext(Ctx)
+export function useAuth() { return useContext(Ctx) }
