@@ -134,3 +134,15 @@ tr:hover td{background:var(--bg3)}
 .empty h3{font-size:22px;color:var(--text2);margin-bottom:0.5rem}
 .empty p{font-size:14px;margin-bottom:1.5rem}
 @media(max-width:768px){.sidebar{display:none}.main{margin-left:0;padding:1.5rem}.frow,.frow3{grid-template-columns:1fr}}
+
+/* Step fixes */
+.steps { display: flex; margin-bottom: 2rem; border-bottom: 1px solid var(--border); overflow-x: auto; gap: 0; }
+.step-ind { display: flex; align-items: center; gap: 8px; padding: 0 16px 1rem; font-size: 12px; color: var(--text3); white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.step-ind.active { color: var(--green); border-bottom-color: var(--green); font-weight: 500; }
+.step-ind.done { color: var(--text2); }
+.step-num { width: 20px; height: 20px; border-radius: 50%; background: var(--bg3); color: var(--text3); font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step-ind.active .step-num { background: var(--green); color: #fff; }
+.step-ind.done .step-num { background: var(--gl); color: var(--green2); }
+.step-actions { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.step-title { font-size: 24px; margin-bottom: 4px; }
+.step-sub { font-size: 14px; color: var(--text2); margin-bottom: 2rem; font-family: 'DM Sans', sans-serif; }
