@@ -7,35 +7,39 @@ import AdminDashboard from './pages/admin/Dashboard'
 import './index.css'
 
 function Spinner() {
-  return <div className="loading"><span className="spinner spinner-lg" /></div>
+  return (
+    <div className="loading">
+      <span className="spinner spinner-lg" />
+    </div>
+  )
 }
 
 function RootRedirect() {
-  const { user, ready, isAdmin } = useAuth()
-  if (!ready) return <Spinner />
+  const { user, loading, isAdmin } = useAuth()
+  if (loading) return <Spinner />
   if (!user) return <Navigate to="/login" replace />
   if (isAdmin) return <Navigate to="/admin" replace />
   return <Navigate to="/dashboard" replace />
 }
 
 function ProtectedCustomer({ children }) {
-  const { user, ready } = useAuth()
-  if (!ready) return <Spinner />
+  const { user, loading } = useAuth()
+  if (loading) return <Spinner />
   if (!user) return <Navigate to="/login" replace />
   return children
 }
 
 function ProtectedAdmin({ children }) {
-  const { user, ready, isAdmin } = useAuth()
-  if (!ready) return <Spinner />
+  const { user, loading, isAdmin } = useAuth()
+  if (loading) return <Spinner />
   if (!user) return <Navigate to="/login" replace />
   if (!isAdmin) return <Navigate to="/dashboard" replace />
   return children
 }
 
 function PublicOnly({ children }) {
-  const { user, ready } = useAuth()
-  if (!ready) return <Spinner />
+  const { user, loading } = useAuth()
+  if (loading) return <Spinner />
   if (user) return <Navigate to="/" replace />
   return children
 }
