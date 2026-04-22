@@ -637,7 +637,7 @@ export default function NewApplication() {
       </div>
 
       <div className="step-form">
-        <div className="step-indicators">
+        <div className="step-indicators" style={{display:"flex",overflowX:"auto",borderBottom:"1px solid var(--border)",marginBottom:"2rem"}}>
           {STEPS.map((s, i) => (
             <div key={i} className={`step-ind ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`}>
               <span className="step-num">{i < step ? '✓' : i + 1}</span>
