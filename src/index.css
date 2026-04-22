@@ -145,7 +145,7 @@ tr:hover td{background:var(--bg3)}
 .step-ind.done .step-num{background:var(--gold-light);color:var(--gold)}
 
 /* ── Step form ── */
-.step-form{max-width:740px}
+.step-form{max-width:100%}
 .step-title{font-size:26px;margin-bottom:6px;color:var(--navy)}
 .step-sub{font-size:14px;color:var(--text2);margin-bottom:2rem;font-family:'DM Sans',sans-serif}
 .step-actions{display:flex;justify-content:space-between;margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border)}
