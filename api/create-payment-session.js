@@ -11,12 +11,14 @@ export default async function handler(req, res) {
     const r1 = await fetch(BASE + '/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': auth },
-      body: JSON.stringify({
-        amount: Math.round(amount * 100),
-        currency: 'CAD',
-        reference: 'TRP-' + applicationId.slice(0, 8).toUpperCase(),
-        description: 'Tripemco Paralegal E&O Insurance',
-      }),
+     body: JSON.stringify({
+  total: {
+    amount: (Math.round(amount * 100) / 100).toFixed(2),
+    currencyCode: 'CAD',
+  },
+  customReference: 'TRP-' + applicationId.slice(0, 8).toUpperCase(),
+  description: 'Tripemco Paralegal E&O Insurance',
+}),
     })
     const t1 = await r1.text()
     if (!r1.ok) return res.status(502).json({ error: 'Order failed', status: r1.status, detail: t1 })
