@@ -12,20 +12,24 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': auth },
       body: JSON.stringify({
-        totalAmount: Math.round(amount * 100),
-        currencyCode: 'CAD',
-        merchantOrderReference: 'TRP-' + applicationId.slice(0, 8).toUpperCase(),
+        amount: Math.round(amount * 100),
+        currency: 'CAD',
+        reference: 'TRP-' + applicationId.slice(0, 8).toUpperCase(),
         description: 'Tripemco Paralegal E&O Insurance',
       }),
     })
     const t1 = await r1.text()
     if (!r1.ok) return res.status(502).json({ error: 'Order failed', status: r1.status, detail: t1 })
     const order = JSON.parse(t1)
-    const orderHref = order.href || order.url || (BASE + '/orders/' + order.id)
+    const orderHref = order.href || order.url || order.links?.self?.href || (BASE + '/orders/' + order.id)
     const r2 = await fetch(BASE + '/payment-sessions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': auth },
-      body: JSON.stringify({ hppType: 'lightbox', originUrl: 'https://tripemco-portal-ciw5.vercel.app', order: orderHref }),
+      body: JSON.stringify({
+        hppType: 'lightbox',
+        originUrl: 'https://tripemco-portal-ciw5.vercel.app',
+        order: orderHref,
+      }),
     })
     const t2 = await r2.text()
     if (!r2.ok) return res.status(502).json({ error: 'Session failed', status: r2.status, detail: t2 })
