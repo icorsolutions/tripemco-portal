@@ -57,7 +57,7 @@ export default function ElavonPayment({ application, quote, onSuccess }) {
       policy_id: pol?.id,
       amount: quote.total_premium,
       currency: 'CAD',
-      status: 'completed',
+      status: 'succeeded',
       payment_method: 'credit_card',
       transaction_id: msg.sessionId,
       paid_at: new Date().toISOString()
