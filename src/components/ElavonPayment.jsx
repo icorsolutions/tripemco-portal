@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
 const PK = 'pk_h9w3pwbpyrvddfhmdm498bxtfgq9'
-const SCRIPT = 'https://uat.hpp.converge.eu.elavonaws.com/client/index.js'
+const SCRIPT = 'https://uat.hpp.converge.eu.elavonaws.com/client/library.js'
 
 export default function ElavonPayment({ application, quote, onSuccess }) {
   const [loading, setLoading] = useState(false)
