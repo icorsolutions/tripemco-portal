@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import Layout from '../components/Layout'
 import ElavonPayment from '../components/ElavonPayment'
+import CertificateGenerator from '../components/CertificateGenerator'
 
 export default function ApplicationDetail() {
   const { id } = useParams()
@@ -100,7 +101,11 @@ export default function ApplicationDetail() {
           </p>
         </div>
       )}
-
+{app.status === 'bound' && policy && (
+  <div style={{ marginTop: '0.75rem' }}>
+    <CertificateGenerator application={app} policy={policy} quote={quote} />
+  </div>
+)}
       <div style={{ display: 'grid', gridTemplateColumns: quote && app.status === 'quoted' ? '1fr 380px' : '1fr', gap: '1.5rem', alignItems: 'start' }}>
         <div>
           {/* Quote summary */}
