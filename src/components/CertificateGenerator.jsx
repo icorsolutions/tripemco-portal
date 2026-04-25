@@ -7,7 +7,7 @@ export default function CertificateGenerator({ application, policy, quote }) {
     setGenerating(true)
     try {
       // Dynamically load jsPDF
-      const { jsPDF } = await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+      const { jsPDF } = await import('jspdf')
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' })
 
       const firm = application.firms || {}
