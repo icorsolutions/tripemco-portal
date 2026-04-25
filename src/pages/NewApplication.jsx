@@ -58,7 +58,7 @@ export default function NewApplication() {
 
   const [services, setServices] = useState({
     employee_count: 1, contractor_count: 0, hires_subcontractors: false,
-    provides_immigration: false, provides_notary: false, provides_mediation: false,
+    provides_immigration: false, immigration_iccrc_compliant: null, provides_notary: false, provides_mediation: false,
     mediation_certified: null, mediation_hours_completed: '', mediation_revenue_pct: '',
     provides_family_law: false, provides_sabs: false, provides_other_services: false,
     other_services_description: '', offices_outside_canada: false,
@@ -375,6 +375,18 @@ export default function NewApplication() {
                 </div>
                 <YN value={services[key]} onChange={v => setSvcField(key, v)} />
               </div>
+              {key === 'provides_immigration' && services.provides_immigration && (
+                <div style={{ marginTop: 12, paddingLeft: 16, borderLeft: '2px solid var(--border)' }}>
+                  <Field label="Are you compliant with ICCRC/CICC (Immigration Consultants of Canada Regulatory Council) requirements?" hint="Non-compliance will result in an automatic decline of coverage">
+                    <YN value={services.immigration_iccrc_compliant} onChange={v => setSvcField('immigration_iccrc_compliant', v)} />
+                  </Field>
+                  {services.immigration_iccrc_compliant === false && (
+                    <div className="alert alert-danger" style={{ marginTop: 8 }}>
+                      ⛔ Non-compliant immigration consulting will result in an automatic decline of coverage.
+                    </div>
+                  )}
+                </div>
+              )}
               {key === 'provides_mediation' && services.provides_mediation && (
                 <div style={{ marginTop: 12, paddingLeft: 16, borderLeft: '2px solid var(--border)' }}>
                   <div className="frow">
