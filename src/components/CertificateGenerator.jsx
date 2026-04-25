@@ -125,12 +125,14 @@ export default function CertificateGenerator({ application, policy, quote }) {
       y += 2
 
       // ── Insured paralegals ────────────────────────────────────────
-      if application.application_paralegals.forEach(ap => {
-          const p = ap.paralegals
-          y = twoCol('Name:', p?.full_name, 'LSO License:', p?.lso_license_number, y)
-        })
-        y += 2
-      }
+      if (application.application_paralegals?.length > 0) {
+  y = sectionHeader('Insured Paralegals', y)
+  application.application_paralegals.forEach(ap => {
+    const p = ap.paralegals
+    y = twoCol('Name:', p?.full_name, 'LSO License:', p?.lso_license_number, y)
+  })
+  y += 2
+}
 
       // ── Conditions ────────────────────────────────────────────────
       y = sectionHeader('Important Conditions', y)
