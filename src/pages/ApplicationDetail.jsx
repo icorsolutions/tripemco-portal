@@ -15,10 +15,10 @@ export default function ApplicationDetail() {
 
   async function loadApp() {
     const { data } = await supabase
-      .from('applications')
-      .select('*, firms(*), coverages(*), quotes(*), policies(*)')
-      .eq('id', id)
-      .single()
+  .from('applications')
+  .select('*, firms(*), coverages(*), quotes(*), policies(*), application_paralegals(*, paralegals(*))')
+  .eq('id', id)
+  .single()
     setApp(data)
     setLoading(false)
   }

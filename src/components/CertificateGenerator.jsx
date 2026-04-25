@@ -102,7 +102,7 @@ export default function CertificateGenerator({ application, policy, quote }) {
       y = sectionHeader('Named Insured', y)
       y = row('Full Name / Firm Name:', firm.firm_name || '—', y, true)
       if (firm.operating_name) y = row('Operating Name:', firm.operating_name, y)
-      y = row('Business Form:', (firm.business_form || '').replace(/_/g, ' '), y)
+      y = row('Business Form:', (firm.business_form || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), y)
       y = row('Address:', [firm.address_line1, firm.city, firm.province, firm.postal_code].filter(Boolean).join(', '), y)
       y = row('OPA Member:', firm.is_opa_member ? 'Yes' : 'No', y)
       y += 2
@@ -125,10 +125,9 @@ export default function CertificateGenerator({ application, policy, quote }) {
       y += 2
 
       // ── Insured paralegals ────────────────────────────────────────
-      if (application.paralegals?.length > 0) {
-        y = sectionHeader('Insured Paralegals', y)
-        application.paralegals.forEach(p => {
-          y = twoCol('Name:', p.full_name, 'LSO License:', p.lso_license_number, y)
+      if application.application_paralegals.forEach(ap => {
+          const p = ap.paralegals
+          y = twoCol('Name:', p?.full_name, 'LSO License:', p?.lso_license_number, y)
         })
         y += 2
       }
