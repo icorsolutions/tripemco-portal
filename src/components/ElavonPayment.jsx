@@ -39,7 +39,7 @@ export default function ElavonPayment({ application, quote, onSuccess }) {
         messageHandler: async (msg, def) => {
   console.log('Elavon message received:', JSON.stringify(msg))
   const successTypes = ['transactionCreated', 'TRANSACTION_CREATED', 'sale', 'success']
-  if (successTypes.includes(msg.type) || msg.sessionId) {
+  if (msg.type === 'handleToken' || msg.sessionId) {
     const eff = new Date().toISOString().split('T')[0]
     const exp = new Date(Date.now() + 365 * 864e5).toISOString().split('T')[0]
     const { data: pol } = await supabase.from('policies').insert({
