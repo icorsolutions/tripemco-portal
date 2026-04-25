@@ -37,33 +37,35 @@ export default function ElavonPayment({ application, quote, onSuccess }) {
           else { lb.show(); setLoading(false) }
         },
         messageHandler: async (msg, def) => {
-          if (msg.type === 'transactionCreated') {
-            const eff = new Date().toISOString().split('T')[0]
-            const exp = new Date(Date.now() + 365 * 864e5).toISOString().split('T')[0]
-            const { data: pol } = await supabase.from('policies').insert({
-              application_id: application.id,
-              firm_id: application.firm_id,
-              policy_number: 'TRP-' + Date.now().toString(36).toUpperCase(),
-              status: 'active',
-              effective_date: eff,
-              expiry_date: exp,
-              total_premium: quote.total_premium
-            }).select().single()
-            await supabase.from('applications').update({ status: 'bound' }).eq('id', application.id)
-            await supabase.from('payments').insert({
-              application_id: application.id,
-              policy_id: pol?.id,
-              amount: quote.total_premium,
-              currency: 'CAD',
-              status: 'completed',
-              payment_method: 'credit_card',
-              transaction_id: msg.sessionId,
-              paid_at: new Date().toISOString()
-            })
-            onSuccess?.(pol)
-          }
-          def()
-        }
+  console.log('Elavon message received:', JSON.stringify(msg))
+  const successTypes = ['transactionCreated', 'TRANSACTION_CREATED', 'sale', 'success']
+  if (successTypes.includes(msg.type) || msg.sessionId) {
+    const eff = new Date().toISOString().split('T')[0]
+    const exp = new Date(Date.now() + 365 * 864e5).toISOString().split('T')[0]
+    const { data: pol } = await supabase.from('policies').insert({
+      application_id: application.id,
+      firm_id: application.firm_id,
+      policy_number: 'TRP-' + Date.now().toString(36).toUpperCase(),
+      status: 'active',
+      effective_date: eff,
+      expiry_date: exp,
+      total_premium: quote.total_premium
+    }).select().single()
+    await supabase.from('applications').update({ status: 'bound' }).eq('id', application.id)
+    await supabase.from('payments').insert({
+      application_id: application.id,
+      policy_id: pol?.id,
+      amount: quote.total_premium,
+      currency: 'CAD',
+      status: 'completed',
+      payment_method: 'credit_card',
+      transaction_id: msg.sessionId,
+      paid_at: new Date().toISOString()
+    })
+    onSuccess?.(pol)
+  }
+  def()
+}
       })
     } catch(e) { setError(e.message); setLoading(false) }
   }
