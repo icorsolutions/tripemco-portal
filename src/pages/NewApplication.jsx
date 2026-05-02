@@ -307,9 +307,7 @@ export default function NewApplication() {
           <h2 className="step-title">Licensed paralegals</h2>
           <p className="step-sub">List all paralegals to be insured under this policy. Maximum 12 without underwriter referral.</p>
 
-          <div className="alert alert-info" style={{ marginBottom: '1.5rem' }}>
-            <strong>Retroactive Date:</strong> The Retroactive Date is the inception date of the Insured's first claims-made professional liability policy for the performance of Professional Services, provided such coverage has been maintained in force and without interruption. In the event of a claim, the Insured must produce proof of continuous coverage.
-          </div>
+          
 
           {paralegals.map((p, i) => (
             <div key={i} className="card" style={{ marginBottom: '1rem' }}>
@@ -339,6 +337,9 @@ export default function NewApplication() {
               <Field label="Is this paralegal an OPA member?" required>
                 <YN value={p.is_opa_member} onChange={v => updateParalegal(i, 'is_opa_member', v)} />
               </Field>
+              <div style={{ background: 'var(--bl)', border: '1px solid #b8ccf5', borderRadius: 'var(--r)', padding: '1rem', marginBottom: '1rem' }}>
+                <p style={{ fontSize: 13, color: 'var(--blue)', lineHeight: 1.6 }}><strong>Retroactive Date:</strong> The Retroactive Date is the inception date of the Insured's first claims-made professional liability policy for the performance of Professional Services, provided such coverage has been maintained in force and without interruption. In the event of a claim, the Insured must produce proof of continuous coverage.</p>
+              </div>
               <Field label="I have read and understand the Retroactive Date clause above" required>
                 <YN value={p.retroactive_date_agreed} onChange={v => updateParalegal(i, 'retroactive_date_agreed', v)} />
               </Field>
