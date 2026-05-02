@@ -172,11 +172,22 @@ export default function NewApplication() {
       )
       await supabase.from('coverages').insert({ application_id: appRecord.id, ...coverages })
 
-     if (quote) {
-  await supabase.from('quotes').insert({ 
-    application_id: appRecord.id, 
-    ...quote,
-    provincial_premium_tax: quote.provincial_tax,
+    if (quote) {
+  await supabase.from('quotes').insert({
+    application_id: appRecord.id,
+    eo_base_premium: quote.eo_base_premium,
+    family_law_surcharge: quote.family_law_surcharge || 0,
+    mediation_premium: quote.mediation_premium || 0,
+    third_party_bond_premium: quote.third_party_bond_premium || 0,
+    cgl_premium: quote.cgl_premium || 0,
+    privacy_breach_premium: quote.privacy_breach_premium || 0,
+    provincial_premium_tax: quote.provincial_tax || 0,
+    provincial_tax: quote.provincial_tax || 0,
+    subtotal: quote.subtotal,
+    total_premium: quote.total_premium,
+    is_opa_rate: quote.is_opa_rate,
+    paralegal_count: quote.paralegal_count,
+    rate_category: quote.rate_category,
   })
 }
 
