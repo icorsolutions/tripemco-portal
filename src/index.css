@@ -110,7 +110,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.6}
 .yn{display:flex;gap:10px;margin-top:6px}
 .yn-btn{padding:8px 24px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
 .yn-btn.yes{background:rgba(26,39,68,0.08);border-color:var(--navy2);color:var(--navy);font-weight:500}
-.yn-btn.no{background:var(--bg3);border-color:var(--border2);color:var(--text);font-weight:500}
+.yn-btn.no{background:rgba(180,50,50,0.06);border-color:#e8b4b4;color:var(--red);font-weight:500}
 
 /* ── Badges ── */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:500}

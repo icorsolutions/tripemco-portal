@@ -397,7 +397,7 @@ export default function NewApplication() {
                       <input type="number" min="0" value={services.mediation_hours_completed} onChange={e => setSvcField('mediation_hours_completed', e.target.value)} />
                     </Field>
                   </div>
-                  <Field label="Mediation fees as % of total revenue" hint="Must be 20% or less to avoid referral">
+                  <Field label="Mediation fees as % of total revenue" hint="">
                     <input type="number" min="0" max="100" value={services.mediation_revenue_pct} onChange={e => setSvcField('mediation_revenue_pct', e.target.value)} placeholder="%" />
                   </Field>
                 </div>
@@ -634,7 +634,7 @@ export default function NewApplication() {
                 <ul style={{ marginTop: 8, paddingLeft: 20 }}>
                   {(uw.declineReasons || []).map((r, i) => <li key={i} style={{ marginBottom: 4 }}>{r.label || r}</li>)}
                 </ul>
-                <p style={{ marginTop: 8, fontSize: 13 }}>Please contact Tripemco directly at <strong>(905) 664-2266</strong> if you have questions.</p>
+                <p style={{ marginTop: 8, fontSize: 13 }}>Please contact Tripemco directly at <strong>(800) 461-5083</strong> if you have questions.</p>
               </div>
             )}
 
@@ -659,6 +659,7 @@ export default function NewApplication() {
                 {q.third_party_bond_premium > 0 && <div className="q-line"><span>Third Party Bond</span><span>+${q.third_party_bond_premium}</span></div>}
                 {q.cgl_premium > 0 && <div className="q-line"><span>CGL — ${coverages.cgl_limit?.toLocaleString()} limit</span><span>+${q.cgl_premium}</span></div>}
                 {q.privacy_breach_premium > 0 && <div className="q-line"><span>Enhanced Privacy Breach</span><span>+${q.privacy_breach_premium}</span></div>}
+                {q.provincial_tax > 0 && <div className="q-line"><span>Ontario Provincial Tax (8% RST)</span><span>+${q.provincial_tax?.toLocaleString()}</span></div>}
                 <div className="q-total"><span>Annual Premium</span><span>${q.total_premium?.toLocaleString()}</span></div>
               </div>
             )}
