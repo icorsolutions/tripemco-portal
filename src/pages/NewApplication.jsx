@@ -172,9 +172,13 @@ export default function NewApplication() {
       )
       await supabase.from('coverages').insert({ application_id: appRecord.id, ...coverages })
 
-      if (quote) {
-        await supabase.from('quotes').insert({ application_id: appRecord.id, ...quote })
-      }
+     if (quote) {
+  await supabase.from('quotes').insert({ 
+    application_id: appRecord.id, 
+    ...quote,
+    provincial_premium_tax: quote.provincial_tax,
+  })
+}
 
       if (uw.decision === 'referred') {
         await supabase.from('referrals').insert({
