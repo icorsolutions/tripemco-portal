@@ -29,11 +29,11 @@ export default function CertificateGenerator({ application, policy, quote }) {
       doc.setTextColor(255, 255, 255)
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(18)
-      doc.text('TRIPEMCO INSURANCE GROUP LTD.', margin, 15)
+      doc.text('TRIPEMCO INSURANCE GROUP', margin, 15)
 
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(9)
-      doc.text('99 Highway 8, Stoney Creek, ON  |  Tel: (905) 664-2266  |  www.tripemco.com', margin, 22)
+      doc.text('99 Highway 8, Stoney Creek, ON  |  Tel: (800) 461-5083  |  www.tripemco.com', margin, 22)
 
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(11)
@@ -156,7 +156,7 @@ export default function CertificateGenerator({ application, policy, quote }) {
       // ── Underwriter ───────────────────────────────────────────────
       y = sectionHeader('Underwriter', y)
       y = row('Insurance Company:', 'Sovereign General Insurance Company', y, true)
-      y = row('Managing Broker:', 'Tripemco Insurance Group Ltd.', y)
+      y = row('Managing Broker:', 'TRIPEMCO INSURANCE GROUP', y)
       y = row('Broker License:', 'RIBO Licensed', y)
 
       // ── Footer ────────────────────────────────────────────────────
@@ -166,7 +166,7 @@ export default function CertificateGenerator({ application, policy, quote }) {
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(7)
       doc.text(
-        `This certificate was issued electronically on ${new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })} | Policy No. ${policyNumber} | Tripemco Insurance Group Ltd.`,
+        `This certificate was issued electronically on ${new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })} | Policy No. ${policyNumber} | TRIPEMCO INSURANCE GROUP`,
         pageW / 2, 274, { align: 'center' }
       )
 

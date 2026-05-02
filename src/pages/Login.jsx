@@ -56,7 +56,7 @@ export default function Login() {
           No account? <Link to="/register">Register here</Link>
         </p>
         <p style={{ fontSize: 11, color: 'var(--text3)', textAlign: 'center', marginTop: '1.5rem' }}>
-          Tripemco Insurance Group Ltd · 99 Highway 8, Stoney Creek ON
+          Tripemco Insurance Group · 99 Highway 8, Stoney Creek ON
         </p>
       </div>
     </div>

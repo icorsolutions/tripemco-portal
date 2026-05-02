@@ -76,7 +76,7 @@ export default function ApplicationDetail() {
             {(app.decline_reasons || []).map((r, i) => <li key={i} style={{ marginBottom: 4 }}>{r.label || r}</li>)}
           </ul>
           <p style={{ marginTop: 12, fontSize: 13 }}>
-            Please contact Tripemco directly at <strong>(905) 664-2266</strong> or <a href="mailto:info@tripemco.com">info@tripemco.com</a> for assistance.
+            Please contact Tripemco directly at <strong>(800) 461-5083</strong> or <a href="mailto:info@tripemco.com">info@tripemco.com</a> for assistance.
           </p>
         </div>
       )}
@@ -88,7 +88,7 @@ export default function ApplicationDetail() {
             {(app.referral_reasons || []).map((r, i) => <li key={i} style={{ marginBottom: 4 }}>{r.label || r}</li>)}
           </ul>
           <p style={{ marginTop: 10, fontSize: 13 }}>
-            A Tripemco broker will contact you within 2–3 business days. Questions? Call <strong>(905) 664-2266</strong>.
+            A Tripemco broker will contact you within 2–3 business days. Questions? Call <strong>(800) 461-5083</strong>.
           </p>
         </div>
       )}
@@ -205,7 +205,7 @@ export default function ApplicationDetail() {
                 onSuccess={handlePaymentSuccess}
               />
               <p style={{ fontSize: 12, color: 'var(--text3)', marginTop: '0.75rem', lineHeight: 1.5 }}>
-                Questions about your quote? Contact Tripemco at <strong>(905) 664-2266</strong> before proceeding.
+                Questions about your quote? Contact Tripemco at <strong>(800) 461-5083</strong> before proceeding.
               </p>
             </div>
           </div>
