@@ -16,7 +16,7 @@ export default function CertificateGenerator({ application, policy, quote }) {
       const expiryDate = policy?.expiry_date ? new Date(policy.expiry_date).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'
       const policyNumber = policy?.policy_number || '—'
       const masterPolicy = 'MP000005'
-      const totalPremium = quote?.total_premium ? `$${Number(quote.total_premium).toLocaleString('en-CA', { minimumFractionDigits: 2 })}` : '—'
+      const totalPremium = quote?.subtotal ? `$${Number(quote.subtotal).toLocaleString('en-CA', { minimumFractionDigits: 2 })}` : '—'
 
       const margin = 20
       const pageW = 215.9

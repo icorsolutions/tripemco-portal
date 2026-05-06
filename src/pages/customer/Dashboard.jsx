@@ -23,7 +23,7 @@ export default function CustomerDashboard() {
         { data: recentApps }
       ] = await Promise.all([
         supabase.from('applications').select('*', { count: 'exact', head: true }).in('firm_id', ids),
-        supabase.from('policies').select('*', { count: 'exact', head: true }),
+        supabase.from('policies').select('*', { count: 'exact', head: true }).in('firm_id', ids).eq('status', 'active'),
         supabase.from('applications').select('*', { count: 'exact', head: true }).in('firm_id', ids).eq('status', 'referred'),
         supabase.from('applications').select('*', { count: 'exact', head: true }).in('firm_id', ids).eq('status', 'quoted'),
         supabase.from('applications').select('*, firms(firm_name)').in('firm_id', ids).order('created_at', { ascending: false }).limit(5),

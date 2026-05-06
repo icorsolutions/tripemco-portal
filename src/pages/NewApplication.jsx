@@ -19,8 +19,8 @@ const STEPS = [
 
 const YN = ({ value, onChange }) => (
   <div className="yn">
-    <button type="button" className={`yn-btn ${value === true ? 'yes' : ''}`} onClick={() => onChange(true)}>Yes</button>
-    <button type="button" className={`yn-btn ${value === false ? 'no' : ''}`} onClick={() => onChange(false)}>No</button>
+    <button type="button" className={`yn-btn ${value === true ? 'yes' : ''}`} onClick={() => onChange(value === true ? null : true)}>Yes</button>
+    <button type="button" className={`yn-btn ${value === false ? 'no' : ''}`} onClick={() => onChange(value === false ? null : false)}>No</button>
   </div>
 )
 
@@ -241,7 +241,7 @@ export default function NewApplication() {
         <div>
           <h2 className="step-title">Firm information</h2>
           <p className="step-sub">Tell us about your paralegal practice.</p>
-          <Field label="Firm name / Full name" required hint="This will appear as the Named Insured on the certificate of insurance">
+          <Field label="Firm name / Full name (legal entity)" required hint="This will appear as the Named Insured on the certificate of insurance">
             <input type="text" value={firm.firm_name} onChange={e => setFirmField('firm_name', e.target.value)} placeholder="Jane Smith" />
           </Field>
           <Field label="Operating name" hint="Leave blank if same as above">
@@ -353,7 +353,7 @@ export default function NewApplication() {
 
       case 3: return (
         <div>
-          <h2 className="step-title">Services & revenue</h2>
+          <h2 className="step-title">Services & Revenue</h2>
           <p className="step-sub">Tell us about the services your firm provides and your annual revenue.</p>
           <div className="frow">
             <Field label="Gross annual revenue — most recent fiscal year" required>
@@ -373,14 +373,14 @@ export default function NewApplication() {
           </div>
           <hr className="divider" />
           {[
-            { key: 'provides_sabs', label: 'Do you earn fees from SABS (Statutory Accident Benefits Schedule) claims?', warn: true },
-            { key: 'offices_outside_canada', label: 'Do you have offices or perform services outside of Canada?', warn: true },
-            { key: 'provides_immigration', label: 'Do you provide immigration consulting services?' },
-            { key: 'provides_notary', label: 'Do you provide notary services?', hint: 'Note: Notary Services coverage will be added automatically' },
-            { key: 'provides_mediation', label: 'Do you provide mediation services?' },
-            { key: 'provides_family_law', label: 'Do you provide family law services?', hint: 'Note: A 25% premium surcharge applies' },
-            { key: 'provides_other_services', label: 'Do you provide any other services outside of paralegal, immigration, notary, or mediation?', warn: true },
-            { key: 'hires_subcontractors', label: 'Do you hire subcontractors?' },
+           { key: 'provides_sabs', label: '1. Do you earn fees from SABS (Statutory Accident Benefits Schedule) claims?', warn: true },
+{ key: 'offices_outside_canada', label: '2. Do you have offices or perform services outside of Canada?', warn: true },
+{ key: 'provides_immigration', label: '3. Do you provide immigration consulting services?' },
+{ key: 'provides_notary', label: '4. Do you provide notary services?', hint: 'Note: Notary Services coverage will be added automatically' },
+{ key: 'provides_mediation', label: '5. Do you provide mediation services?' },
+{ key: 'provides_family_law', label: '6. Do you provide family law services?', hint: 'Note: A 25% premium surcharge applies' },
+{ key: 'provides_other_services', label: '7. Do you provide any other services outside of paralegal, immigration, notary, or mediation?', warn: true },
+{ key: 'hires_subcontractors', label: '8. Do you hire subcontractors?' },
           ].map(({ key, label, hint, warn }) => (
             <div key={key} style={{ marginBottom: '1.25rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
