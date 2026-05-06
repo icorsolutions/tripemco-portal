@@ -213,6 +213,14 @@ export default function NewApplication() {
         <div>
           <h2 className="step-title">Application type</h2>
           <p className="step-sub">Are you applying for new coverage or renewing an existing policy?</p>
+          <Field label="Coverage effective date" required hint="Must be today or a future date — backdating is not permitted">
+  <input
+    type="date"
+    value={coverages.effective_date || ''}
+    onChange={e => setCovField('effective_date', e.target.value)}
+    min={new Date().toISOString().split('T')[0]}
+  />
+</Field>
           <div style={{ display: 'flex', gap: 12, marginBottom: '1.5rem' }}>
             {['new', 'renewal'].map(t => (
               <button key={t} type="button" onClick={() => setAppType(t)}
@@ -449,7 +457,7 @@ export default function NewApplication() {
           <Field label="Does your firm secure a standard written contract or retainer agreement for every project?" required>
             <YN value={bizPractice.has_written_retainer} onChange={v => setBizField('has_written_retainer', v)} />
           </Field>
-          {bizPractice.has_written_retainer && (
+          {bizPractice.has_written_retainer === false && (
             <Field label="Percentage of revenue where a written contract is secured">
               <input type="number" min="0" max="100" value={bizPractice.retainer_pct} onChange={e => setBizField('retainer_pct', e.target.value)} placeholder="%" />
             </Field>
@@ -719,7 +727,7 @@ export default function NewApplication() {
         {renderStep()}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-          <button type="button" className="btn btn-ghost" onClick={() => { setStep(s => s - 1); setError('') }} disabled={step === 0}>
+          <button type="button" className="btn btn-ghost" onClick={() => { setStep(s => s - 1); setError('') }} disabled={step === 0 || (step === 8 && runUnderwriting(appData, paralegalCount, coverages).decision === 'referred')}>
             ← Previous
           </button>
           {step < STEPS.length - 1 ? (

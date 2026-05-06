@@ -6,175 +6,228 @@ export default function CertificateGenerator({ application, policy, quote }) {
   async function generateCertificate() {
     setGenerating(true)
     try {
-      // Dynamically load jsPDF
       const { jsPDF } = await import('jspdf')
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' })
 
       const firm = application.firms || {}
-      const cov = application.coverages?.[0] || {}
-      const effectiveDate = policy?.effective_date ? new Date(policy.effective_date).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'
-      const expiryDate = policy?.expiry_date ? new Date(policy.expiry_date).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'
-      const policyNumber = policy?.policy_number || '—'
-      const masterPolicy = 'MP000005'
-      const totalPremium = quote?.subtotal ? `$${Number(quote.subtotal).toLocaleString('en-CA', { minimumFractionDigits: 2 })}` : '—'
+      const paralegals = (application.application_paralegals || []).map(ap => ap.paralegals).filter(Boolean)
 
-      const margin = 20
+      const effectiveDate = policy?.effective_date
+        ? new Date(policy.effective_date).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
+        : '—'
+      const expiryDate = policy?.expiry_date
+        ? new Date(policy.expiry_date).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
+        : '—'
+      const issueDate = new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
+      const certNumber = policy?.certificate_number || policy?.policy_number || '—'
+      const basePremium = quote?.subtotal || quote?.eo_base_premium || 0
+      const premiumFormatted = '$' + Number(basePremium).toLocaleString('en-CA', { minimumFractionDigits: 2 })
+
+      const address = [firm.address_line1, firm.address_line2, firm.city, firm.province, firm.postal_code]
+        .filter(Boolean).join(', ')
+
+      const margin = 14
       const pageW = 215.9
       const contentW = pageW - margin * 2
 
-      // ── Navy header bar ──────────────────────────────────────────
-      doc.setFillColor(26, 39, 68)
-      doc.rect(0, 0, pageW, 35, 'F')
+      const col1 = margin
+      const col2 = margin + 48
+      const col3 = margin + 110
+      const col4 = margin + 148
+      const rowH = 6.5
 
-      doc.setTextColor(255, 255, 255)
+      // Title
       doc.setFont('helvetica', 'bold')
-      doc.setFontSize(18)
-      doc.text('TRIPEMCO INSURANCE GROUP', margin, 15)
-
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(9)
-      doc.text('99 Highway 8, Stoney Creek, ON  |  Tel: (800) 461-5083  |  www.tripemco.com', margin, 22)
-
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(11)
-      doc.text('CERTIFICATE OF INSURANCE', margin, 30)
-
-      // ── Gold accent line ──────────────────────────────────────────
-      doc.setFillColor(200, 151, 58)
-      doc.rect(0, 35, pageW, 2, 'F')
-
-      // ── Certificate title ─────────────────────────────────────────
-      let y = 48
+      doc.setFontSize(12)
       doc.setTextColor(26, 39, 68)
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(13)
-      doc.text('PARALEGAL ERRORS & OMISSIONS LIABILITY INSURANCE', pageW / 2, y, { align: 'center' })
+      doc.text('Paralegals Errors and Omissions Liability Certificate of Insurance', pageW / 2, 18, { align: 'center' })
 
-      y += 6
       doc.setFont('helvetica', 'normal')
-      doc.setFontSize(9)
-      doc.setTextColor(80, 80, 80)
-      doc.text('Underwritten by Sovereign General Insurance Company', pageW / 2, y, { align: 'center' })
-      doc.text(`Master Policy No. ${masterPolicy}`, pageW / 2, y + 5, { align: 'center' })
+      doc.setFontSize(8)
+      doc.setTextColor(60, 60, 60)
+      const titleNote = 'This policy covers only Claims first made against the Insureds and reported to the Insurer during the Policy Period or any applicable extended reporting period.'
+      doc.text(doc.splitTextToSize(titleNote, contentW), pageW / 2, 24, { align: 'center' })
 
-      // ── Section helper ────────────────────────────────────────────
-      function sectionHeader(title, yPos) {
+      doc.setFillColor(200, 151, 58)
+      doc.rect(margin, 30, contentW, 0.8, 'F')
+
+      let y = 36
+
+      function hdr(text, yp) {
         doc.setFillColor(26, 39, 68)
-        doc.rect(margin, yPos, contentW, 6, 'F')
-        doc.setTextColor(255, 255, 255)
+        doc.rect(col1, yp - 4, contentW, rowH, 'F')
         doc.setFont('helvetica', 'bold')
         doc.setFontSize(8)
-        doc.text(title.toUpperCase(), margin + 3, yPos + 4)
-        return yPos + 10
+        doc.setTextColor(255, 255, 255)
+        doc.text(text, col1 + 2, yp)
+        return yp + rowH
       }
 
-      function row(label, value, yPos, bold = false) {
-        doc.setTextColor(80, 80, 80)
+      function row(lbl, val, yp) {
+        doc.setFillColor(245, 246, 248)
+        doc.rect(col1, yp - 4, contentW, rowH, 'F')
+        doc.setDrawColor(220, 220, 225)
+        doc.rect(col1, yp - 4, contentW, rowH)
         doc.setFont('helvetica', 'normal')
-        doc.setFontSize(8.5)
-        doc.text(label, margin + 2, yPos)
+        doc.setFontSize(8)
+        doc.setTextColor(100, 100, 120)
+        doc.text(lbl, col1 + 2, yp)
         doc.setTextColor(26, 39, 68)
-        doc.setFont('helvetica', bold ? 'bold' : 'normal')
-        doc.text(value || '—', margin + 65, yPos)
-        return yPos + 6
+        doc.text(String(val || '—'), col2, yp)
+        return yp + rowH
       }
 
-      function twoCol(label1, val1, label2, val2, yPos) {
-        const col2 = margin + contentW / 2
-        doc.setTextColor(80, 80, 80)
+      function row2(l1, v1, l2, v2, yp) {
+        doc.setFillColor(245, 246, 248)
+        doc.rect(col1, yp - 4, contentW, rowH, 'F')
+        doc.setDrawColor(220, 220, 225)
+        doc.rect(col1, yp - 4, contentW, rowH)
         doc.setFont('helvetica', 'normal')
-        doc.setFontSize(8.5)
-        doc.text(label1, margin + 2, yPos)
+        doc.setFontSize(8)
+        doc.setTextColor(100, 100, 120)
+        doc.text(l1, col1 + 2, yp)
         doc.setTextColor(26, 39, 68)
-        doc.setFont('helvetica', 'bold')
-        doc.text(val1 || '—', margin + 55, yPos)
-        doc.setTextColor(80, 80, 80)
-        doc.setFont('helvetica', 'normal')
-        doc.text(label2, col2 + 2, yPos)
+        doc.text(String(v1 || '—'), col2, yp)
+        doc.setTextColor(100, 100, 120)
+        doc.text(l2, col3, yp)
         doc.setTextColor(26, 39, 68)
-        doc.setFont('helvetica', 'bold')
-        doc.text(val2 || '—', col2 + 55, yPos)
-        return yPos + 6
+        doc.text(String(v2 || '—'), col4, yp)
+        return yp + rowH
       }
 
-      // ── Named insured ─────────────────────────────────────────────
-      y = 68
-      y = sectionHeader('Named Insured', y)
-      y = row('Full Name / Firm Name:', firm.firm_name || '—', y, true)
-      if (firm.operating_name) y = row('Operating Name:', firm.operating_name, y)
-      y = row('Business Form:', (firm.business_form || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), y)
-      y = row('Address:', [firm.address_line1, firm.city, firm.province, firm.postal_code].filter(Boolean).join(', '), y)
+      function multiRow(lbl, lines, yp) {
+        const h = Math.max(rowH, lines.length * 5 + 2)
+        doc.setFillColor(245, 246, 248)
+        doc.rect(col1, yp - 4, contentW, h, 'F')
+        doc.setDrawColor(220, 220, 225)
+        doc.rect(col1, yp - 4, contentW, h)
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(8)
+        doc.setTextColor(100, 100, 120)
+        doc.text(lbl, col1 + 2, yp)
+        doc.setTextColor(26, 39, 68)
+        lines.forEach((ln, i) => doc.text(ln, col2, yp + i * 5))
+        return yp + h
+      }
+
+      function wrapRow(lbl, text, yp) {
+        const lines = doc.splitTextToSize(text, contentW - 52)
+        const h = lines.length * 4.5 + 4
+        doc.setFillColor(245, 246, 248)
+        doc.rect(col1, yp - 4, contentW, h, 'F')
+        doc.setDrawColor(220, 220, 225)
+        doc.rect(col1, yp - 4, contentW, h)
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(7.5)
+        doc.setTextColor(100, 100, 120)
+        doc.text(lbl, col1 + 2, yp)
+        doc.setTextColor(40, 40, 40)
+        doc.text(lines, col2, yp)
+        return yp + h
+      }
+
+      // Master policy / cert number
+      y = row2('Master Policy Number:', 'MP000005', 'Certificate Number:', certNumber, y)
+      y = row('Insured Capacity:', '100% The Sovereign General Insurance Company', y)
       y = row('OPA Member:', firm.is_opa_member ? 'Yes' : 'No', y)
       y += 2
 
-      // ── Policy details ────────────────────────────────────────────
-      y = sectionHeader('Policy Details', y)
-      y = twoCol('Policy Number:', policyNumber, 'Application Type:', (application.application_type || '').toUpperCase(), y)
-      y = twoCol('Effective Date:', effectiveDate, 'Expiry Date:', expiryDate, y)
-      y = row('Annual Premium:', totalPremium, y, true)
+      // Item 1
+      y = hdr('Item 1.  Named Insured', y)
+      y = row('Named Insured:', firm.firm_name || '—', y)
+      y = row("Named Insured's Address:", address, y)
+      const paraLines = paralegals.length > 0
+        ? paralegals.map(p => p.full_name + ' (LSO: ' + p.lso_license_number + ')')
+        : ['—']
+      y = multiRow('Insured Paralegal(s):', paraLines, y)
       y += 2
 
-      // ── Coverage ──────────────────────────────────────────────────
-      y = sectionHeader('Coverage Summary', y)
-      y = twoCol('E&O Limit Per Claim:', '$1,000,000', 'Aggregate Limit:', '$2,000,000', y)
-      y = twoCol('Deductible:', '$1,500 per claim', 'Identity Fraud Expense:', '$5,000', y)
-      if (cov.wants_mediation) y = row('Mediation Services:', 'Included', y)
-      if (cov.wants_cgl) y = twoCol('CGL Coverage:', 'Included', 'CGL Limit:', `$${Number(cov.cgl_limit || 0).toLocaleString()}`, y)
-      if (cov.wants_privacy_breach_upgrade) y = twoCol('Privacy Breach Upgrade:', 'Included', 'Limit:', `$${Number(cov.privacy_breach_limit || 0).toLocaleString()}`, y)
-      if (cov.wants_third_party_bond) y = row('Third Party Bond:', 'Included', y)
-      y += 2
+      // Item 2
+      y = hdr('Item 2.  Policy Period', y)
+      y = row2('FROM:', effectiveDate, 'TO:', expiryDate, y)
+      doc.setFontSize(7)
+      doc.setTextColor(100, 100, 100)
+      doc.text("Both dates at 12:01 a.m. at standard time at the Named Insured's Address", col1 + 2, y)
+      y += rowH
 
-      // ── Insured paralegals ────────────────────────────────────────
-      if (application.application_paralegals?.length > 0) {
-  y = sectionHeader('Insured Paralegals', y)
-  application.application_paralegals.forEach(ap => {
-    const p = ap.paralegals
-    y = twoCol('Name:', p?.full_name, 'LSO License:', p?.lso_license_number, y)
-  })
-  y += 2
-}
+      // Item 3
+      y = hdr('Item 3.  Limits of Liability', y)
+      y = row2('Each Claim:', '$1,000,000', 'Policy Aggregate:', '$2,000,000', y)
 
-      // ── Conditions ────────────────────────────────────────────────
-      y = sectionHeader('Important Conditions', y)
+      // Item 4
+      y = hdr('Item 4.  Deductible', y)
+      y = row2('Each Claim:', '$1,500', '', '', y)
+
+      // Item 5
+      y = hdr('Item 5.  Premium', y)
+      y = row2('Premium:', premiumFormatted, 'Minimum Retained Premium:', '$300', y)
+
+      // Item 6
+      y = hdr('Item 6.  Retroactive Date', y)
+      const retroText = 'The Retroactive Date shall be the inception date of the Insured first claims-made errors and omissions policy for the performance of Professional Services, as indicated herein, provided such coverage has been maintained in force and without interruption. In the event of a claim the Insured will have to produce a copy of the declarations page or certificate of insurance evidencing such retroactive date to the Insurer.'
+      y = wrapRow('', retroText, y)
+
+      // Item 7
+      y = hdr('Item 7.  Endorsements', y)
+      y = row('', 'Per attached.', y)
+
+      // Item 8
+      y = hdr('Item 8.  Professional Services', y)
+      y = wrapRow('Activities:', 'Activities authorized by The Law Society of Ontario to be engaged in by a Class P1 Licensee and as more fully described in the Policy.', y)
+
+      // Item 9
+      y = hdr('Item 9.  Brokerage', y)
+      y = row('Brokerage:', 'Tripemco Insurance Group Limited', y)
+      y = row('Brokerage Address:', '99 Highway No. 8, 2nd Floor, Stoney Creek, ON L8G 1C1', y)
+
+      // Item 10
+      y = hdr('Item 10.  Certificate Holder', y)
+      y = row('Certificate Holder:', 'The Law Society of Ontario', y)
+      y = row('Certificate Holder Address:', 'Osgoode Hall, 130 Queen Street West, Toronto, ON M5H 2N6', y)
+
+      y += 4
+
+      // Declaration
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(7)
       doc.setTextColor(60, 60, 60)
+      const dec1 = 'In reliance upon the statements contained in the application, this duly signed Certificate of Insurance confirms that an Errors & Omissions Insurance Policy has been effected for the Named Insured for the Policy Period indicated above. This Certificate is issued as a matter of information only and does not amend, extend or otherwise alter the coverage afforded by the Policy which contains all the agreed upon terms and conditions of coverage and which are subject to change or termination. Should this Certificate be cancelled before the expiration date, the Insurer will endeavour to provide sixty (60) days advance written notice to The Law Society of Ontario, but failure to do so shall impose no obligation of liability of any kind upon the Insurer, its agents or representatives.'
+      const dec1Lines = doc.splitTextToSize(dec1, contentW)
+      doc.text(dec1Lines, col1, y)
+      y += dec1Lines.length * 3.8 + 3
+
+      const dec2 = 'In witness whereof, the Insurer have duly authorized Tripemco Insurance Group Limited to issue this document on their behalf. In witness whereof, the Insurer has caused this Certificate to be countersigned by a duly authorized representative.'
+      const dec2Lines = doc.splitTextToSize(dec2, contentW)
+      doc.text(dec2Lines, col1, y)
+      y += dec2Lines.length * 3.8 + 8
+
+      // Signature
+      doc.setDrawColor(26, 39, 68)
+      doc.line(col1, y, col1 + 80, y)
+      doc.line(col3, y, col3 + 50, y)
+      y += 4
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(8)
+      doc.setTextColor(26, 39, 68)
+      doc.text('Authorized Representative', col1, y)
+      doc.text('Date', col3, y)
+      y += 4
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(7.5)
-      const conditions = [
-        '1. This certificate is issued as a matter of information only and confers no rights upon the certificate holder.',
-        '2. Coverage is subject to all the terms, conditions, and exclusions of the master policy.',
-        '3. This certificate does not amend, extend, or alter the coverage afforded by the policy.',
-        '4. The Retroactive Date is the inception date of the Named Insured\'s first claims-made professional liability policy.',
-        '5. A 90-day Extended Reporting Period is included as standard.',
-        '6. This policy is issued pursuant to the Law Society of Ontario paralegal insurance requirements.',
-      ]
-      conditions.forEach(c => {
-        doc.text(c, margin + 2, y, { maxWidth: contentW - 4 })
-        y += 5
-      })
-      y += 2
+      doc.text('Tripemco Insurance Group Limited', col1, y)
+      doc.text(issueDate, col3, y)
 
-      // ── Underwriter ───────────────────────────────────────────────
-      y = sectionHeader('Underwriter', y)
-      y = row('Insurance Company:', 'Sovereign General Insurance Company', y, true)
-      y = row('Managing Broker:', 'TRIPEMCO INSURANCE GROUP', y)
-      y = row('Broker License:', 'RIBO Licensed', y)
-
-      // ── Footer ────────────────────────────────────────────────────
+      // Footer
       doc.setFillColor(26, 39, 68)
-      doc.rect(0, 267, pageW, 12, 'F')
+      doc.rect(0, 267, pageW, 10, 'F')
       doc.setTextColor(255, 255, 255)
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(7)
-      doc.text(
-        `This certificate was issued electronically on ${new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })} | Policy No. ${policyNumber} | TRIPEMCO INSURANCE GROUP`,
-        pageW / 2, 274, { align: 'center' }
-      )
+      doc.text('Certificate No. ' + certNumber + '  |  Master Policy No. MP000005  |  Tripemco Insurance Group Limited  |  (800) 461-5083', pageW / 2, 273, { align: 'center' })
 
-      // ── Save ──────────────────────────────────────────────────────
-      const filename = `Tripemco-Certificate-${policyNumber}-${firm.firm_name?.replace(/\s+/g, '-') || 'Policy'}.pdf`
-      doc.save(filename)
+      doc.save('Tripemco-Certificate-' + certNumber + '.pdf')
     } catch (e) {
-      console.error('Certificate generation error:', e)
+      console.error('Certificate error:', e)
       alert('Failed to generate certificate: ' + e.message)
     } finally {
       setGenerating(false)
@@ -184,15 +237,8 @@ export default function CertificateGenerator({ application, policy, quote }) {
   if (!policy) return null
 
   return (
-    <button
-      className="btn btn-ghost"
-      onClick={generateCertificate}
-      disabled={generating}
-      style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-    >
-      {generating
-        ? <><span className="spinner" style={{ width: 16, height: 16 }} /> Generating…</>
-        : '⬇ Download Certificate'}
+    <button className="btn btn-ghost" onClick={generateCertificate} disabled={generating}>
+      {generating ? <><span className="spinner" style={{ width: 16, height: 16 }} /> Generating…</> : '⬇ Download Certificate'}
     </button>
   )
 }
