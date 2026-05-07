@@ -22,14 +22,11 @@ export default function CertificateGenerator({ application, policy, quote }) {
       const certNumber = policy?.certificate_number || policy?.policy_number || '—'
       const basePremium = quote?.subtotal || quote?.eo_base_premium || 0
       const premiumFormatted = '$' + Number(basePremium).toLocaleString('en-CA', { minimumFractionDigits: 2 })
-
-      const address = [firm.address_line1, firm.address_line2, firm.city, firm.province, firm.postal_code]
-        .filter(Boolean).join(', ')
+      const address = [firm.address_line1, firm.address_line2, firm.city, firm.province, firm.postal_code].filter(Boolean).join(', ')
 
       const margin = 14
       const pageW = 215.9
       const contentW = pageW - margin * 2
-
       const col1 = margin
       const col2 = margin + 48
       const col3 = margin + 110
@@ -41,13 +38,10 @@ export default function CertificateGenerator({ application, policy, quote }) {
       doc.setFontSize(12)
       doc.setTextColor(26, 39, 68)
       doc.text('Paralegals Errors and Omissions Liability Certificate of Insurance', pageW / 2, 18, { align: 'center' })
-
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(8)
       doc.setTextColor(60, 60, 60)
-      const titleNote = 'This policy covers only Claims first made against the Insureds and reported to the Insurer during the Policy Period or any applicable extended reporting period.'
-      doc.text(doc.splitTextToSize(titleNote, contentW), pageW / 2, 24, { align: 'center' })
-
+      doc.text(doc.splitTextToSize('This policy covers only Claims first made against the Insureds and reported to the Insurer during the Policy Period or any applicable extended reporting period.', contentW), pageW / 2, 24, { align: 'center' })
       doc.setFillColor(200, 151, 58)
       doc.rect(margin, 30, contentW, 0.8, 'F')
 
@@ -120,19 +114,18 @@ export default function CertificateGenerator({ application, policy, quote }) {
         doc.setFont('helvetica', 'normal')
         doc.setFontSize(7.5)
         doc.setTextColor(100, 100, 120)
-        doc.text(lbl, col1 + 2, yp)
+        if (lbl) doc.text(lbl, col1 + 2, yp)
         doc.setTextColor(40, 40, 40)
-        doc.text(lines, col2, yp)
+        doc.text(lines, lbl ? col2 : col1 + 2, yp)
         return yp + h
       }
 
-      // Master policy / cert number
+      // Header rows
       y = row2('Master Policy Number:', 'MP000005', 'Certificate Number:', certNumber, y)
       y = row('Insured Capacity:', '100% The Sovereign General Insurance Company', y)
       y = row('OPA Member:', firm.is_opa_member ? 'Yes' : 'No', y)
       y += 2
 
-      // Item 1
       y = hdr('Item 1.  Named Insured', y)
       y = row('Named Insured:', firm.firm_name || '—', y)
       y = row("Named Insured's Address:", address, y)
@@ -142,7 +135,6 @@ export default function CertificateGenerator({ application, policy, quote }) {
       y = multiRow('Insured Paralegal(s):', paraLines, y)
       y += 2
 
-      // Item 2
       y = hdr('Item 2.  Policy Period', y)
       y = row2('FROM:', effectiveDate, 'TO:', expiryDate, y)
       doc.setFontSize(7)
@@ -150,37 +142,28 @@ export default function CertificateGenerator({ application, policy, quote }) {
       doc.text("Both dates at 12:01 a.m. at standard time at the Named Insured's Address", col1 + 2, y)
       y += rowH
 
-      // Item 3
       y = hdr('Item 3.  Limits of Liability', y)
       y = row2('Each Claim:', '$1,000,000', 'Policy Aggregate:', '$2,000,000', y)
 
-      // Item 4
       y = hdr('Item 4.  Deductible', y)
       y = row2('Each Claim:', '$1,500', '', '', y)
 
-      // Item 5
       y = hdr('Item 5.  Premium', y)
       y = row2('Premium:', premiumFormatted, 'Minimum Retained Premium:', '$300', y)
 
-      // Item 6
       y = hdr('Item 6.  Retroactive Date', y)
-      const retroText = 'The Retroactive Date shall be the inception date of the Insured first claims-made errors and omissions policy for the performance of Professional Services, as indicated herein, provided such coverage has been maintained in force and without interruption. In the event of a claim the Insured will have to produce a copy of the declarations page or certificate of insurance evidencing such retroactive date to the Insurer.'
-      y = wrapRow('', retroText, y)
+      y = wrapRow('', 'The Retroactive Date shall be the inception date of the Insured first claims-made errors and omissions policy for the performance of Professional Services, as indicated herein, provided such coverage has been maintained in force and without interruption. In the event of a claim the Insured will have to produce a copy of the declarations page or certificate of insurance evidencing such retroactive date to the Insurer.', y)
 
-      // Item 7
       y = hdr('Item 7.  Endorsements', y)
       y = row('', 'Per attached.', y)
 
-      // Item 8
       y = hdr('Item 8.  Professional Services', y)
       y = wrapRow('Activities:', 'Activities authorized by The Law Society of Ontario to be engaged in by a Class P1 Licensee and as more fully described in the Policy.', y)
 
-      // Item 9
       y = hdr('Item 9.  Brokerage', y)
       y = row('Brokerage:', 'Tripemco Insurance Group Limited', y)
       y = row('Brokerage Address:', '99 Highway No. 8, 2nd Floor, Stoney Creek, ON L8G 1C1', y)
 
-      // Item 10
       y = hdr('Item 10.  Certificate Holder', y)
       y = row('Certificate Holder:', 'The Law Society of Ontario', y)
       y = row('Certificate Holder Address:', 'Osgoode Hall, 130 Queen Street West, Toronto, ON M5H 2N6', y)

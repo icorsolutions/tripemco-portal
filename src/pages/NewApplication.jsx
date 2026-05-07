@@ -5,17 +5,9 @@ import { supabase } from '../lib/supabase'
 import { runUnderwriting, calculatePremium } from '../lib/underwriting'
 import Layout from '../components/Layout'
 
-const STEPS = [
-  'Application Type',
-  'Firm Information',
-  'Paralegals',
-  'Services',
-  'Business Practice',
-  'Prior Insurance',
-  'Loss Experience',
-  'Coverage Selection',
-  'Review & Submit',
-]
+const STEPS = appType === 'renewal'
+  ? ['Application Type', 'Firm Information', 'Paralegals', 'Services', 'Business Practice', 'Loss Experience', 'Coverage Selection', 'Review & Submit']
+  : ['Application Type', 'Firm Information', 'Paralegals', 'Services', 'Business Practice', 'Prior Insurance', 'Loss Experience', 'Coverage Selection', 'Review & Submit']
 
 const YN = ({ value, onChange }) => (
   <div className="yn">
@@ -97,6 +89,7 @@ export default function NewApplication() {
 
   const [coverages, setCov] = useState({
     eo_limit_per_claim: 1000000, eo_aggregate_limit: 2000000, eo_deductible: 1500,
+    effective_date: new Date().toISOString().split('T')[0],
     wants_mediation: false, wants_notary: false, wants_third_party_bond: false,
     wants_cgl: false, cgl_limit: 1000000,
     wants_privacy_breach_upgrade: false, privacy_breach_limit: 5000,
@@ -162,8 +155,8 @@ export default function NewApplication() {
         ...priorIns,
         ...lossExp,
         retroactive_date_agreed: paralegals.every(p => p.retroactive_date_agreed === true),
-        effective_date: new Date().toISOString().split('T')[0],
-        expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        effective_date: coverages.effective_date || new Date().toISOString().split('T')[0],
+        expiry_date: new Date(new Date(coverages.effective_date || Date.now()).getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       }).select().single()
       if (appErr) throw appErr
 
@@ -213,14 +206,7 @@ export default function NewApplication() {
         <div>
           <h2 className="step-title">Application type</h2>
           <p className="step-sub">Are you applying for new coverage or renewing an existing policy?</p>
-          <Field label="Coverage effective date" required hint="Must be today or a future date — backdating is not permitted">
-  <input
-    type="date"
-    value={coverages.effective_date || ''}
-    onChange={e => setCovField('effective_date', e.target.value)}
-    min={new Date().toISOString().split('T')[0]}
-  />
-</Field>
+          
           <div style={{ display: 'flex', gap: 12, marginBottom: '1.5rem' }}>
             {['new', 'renewal'].map(t => (
               <button key={t} type="button" onClick={() => setAppType(t)}
@@ -263,15 +249,19 @@ export default function NewApplication() {
                 <option value="corporation">Corporation</option>
               </select>
             </Field>
-            <Field label="Date operations began" required>
-              <input type="date" value={firm.operations_start_date} onChange={e => setFirmField('operations_start_date', e.target.value)} />
-            </Field>
+            {appType !== 'renewal' && (
+              
+              <Field label="Date operations began" required>
+                <input type="date" value={firm.operations_start_date} onChange={e => setFirmField('operations_start_date', e.target.value)} />
+              </Field>
+              
+            )}
           </div>
           <Field label="Are you an OPA (Ontario Paralegal Association) member?" required>
             <YN value={firm.is_opa_member} onChange={v => setFirmField('is_opa_member', v)} />
           </Field>
-          {firm.is_opa_member && (
-            <Field label="OPA membership number">
+          {firm.is_opa_member === true && (
+            <Field label="OPA membership number" required>
               <input type="text" value={firm.opa_membership_number} onChange={e => setFirmField('opa_membership_number', e.target.value)} />
             </Field>
           )}
@@ -345,6 +335,11 @@ export default function NewApplication() {
               <Field label="Is this paralegal an OPA member?" required>
                 <YN value={p.is_opa_member} onChange={v => updateParalegal(i, 'is_opa_member', v)} />
               </Field>
+              {p.is_opa_member === true && (
+                <Field label="OPA membership number" required>
+                  <input type="text" value={p.opa_membership_number || ''} onChange={e => updateParalegal(i, 'opa_membership_number', e.target.value)} placeholder="OPA-12345" />
+                </Field>
+              )}
               <div style={{ background: 'var(--bl)', border: '1px solid #b8ccf5', borderRadius: 'var(--r)', padding: '1rem', marginBottom: '1rem' }}>
                 <p style={{ fontSize: 13, color: 'var(--blue)', lineHeight: 1.6 }}><strong>Retroactive Date:</strong> The Retroactive Date is the inception date of the Insured's first claims-made professional liability policy for the performance of Professional Services, provided such coverage has been maintained in force and without interruption. In the event of a claim, the Insured must produce proof of continuous coverage.</p>
               </div>
@@ -556,6 +551,10 @@ export default function NewApplication() {
         <div>
           <h2 className="step-title">Coverage selection</h2>
           <p className="step-sub">All policies include E&O, Identity Fraud Expense ($5,000), and a 90-day Extended Reporting Period as standard.</p>
+          <Field label="Coverage effective date" required hint="Must be today or a future date — backdating is not permitted">
+  <input type="date" value={coverages.effective_date || ''} min={new Date().toISOString().split('T')[0]}
+    onChange={e => { if (e.target.value >= new Date().toISOString().split('T')[0]) setCovField('effective_date', e.target.value) }} />
+</Field>
 
           <div className="card" style={{ marginBottom: '1rem', background: 'rgba(26,39,68,0.04)', borderColor: 'rgba(26,39,68,0.15)' }}>
             <h4 style={{ fontFamily: 'Cormorant Garamond', fontSize: 17, fontWeight: 500, marginBottom: 8, color: 'var(--navy)' }}>E&O Coverage — Mandatory</h4>
@@ -647,7 +646,7 @@ export default function NewApplication() {
 
         return (
           <div>
-            <h2 className="step-title">Review & submit</h2>
+            <h2 className="step-title">Review & submit — {appType === 'renewal' ? 'Policy Renewal' : 'New Application'}</h2>
             <p className="step-sub">Please review your application carefully before submitting. By submitting you declare all information is true and accurate.</p>
 
             {error && <div className="alert alert-danger">{error}</div>}
@@ -727,11 +726,11 @@ export default function NewApplication() {
         {renderStep()}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-          <button type="button" className="btn btn-ghost" onClick={() => { setStep(s => s - 1); setError('') }} disabled={step === 0 || (step === 8 && runUnderwriting(appData, paralegalCount, coverages).decision === 'referred')}>
+          <button type="button" className="btn btn-ghost" onClick={() => { const n = step + 1; setStep(appType === 'renewal' && n === 5 ? 6 : n); setError('') }} disabled={step === 0 || (step === 8 && runUnderwriting(appData, paralegalCount, coverages).decision === 'referred')}>
             ← Previous
           </button>
           {step < STEPS.length - 1 ? (
-            <button type="button" className="btn btn-primary" onClick={() => { setStep(s => s + 1); setError('') }}>
+            <button type="button" className="btn btn-primary" onClick={() => { const n = step + 1; setStep(appType === 'renewal' && n === 5 ? 6 : n); setError('') }}>
               Next →
             </button>
           ) : (
