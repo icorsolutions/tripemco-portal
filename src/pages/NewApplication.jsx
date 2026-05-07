@@ -711,7 +711,9 @@ export default function NewApplication() {
 
   const uwForSubmit = step === 8 ? runUnderwriting(appData, paralegalCount, coverages) : null
 
-  return (
+  const visibleSteps = appType === 'renewal' ? STEPS.filter(s => s !== 'Prior Insurance') : STEPS
+
+    return (
     <Layout>
       <div className="ph">
         <div>
@@ -722,7 +724,6 @@ export default function NewApplication() {
 
       <div>
         <div className="step-indicators">
-          const visibleSteps = appType === 'renewal' ? STEPS.filter(s => s !== 'Prior Insurance') : STEPS
           {visibleSteps.map((s, i) => (
             <div key={i} className={`step-ind ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`}>
               <span className="step-num">{i < step ? '✓' : i + 1}</span>
