@@ -5,10 +5,17 @@ import { supabase } from '../lib/supabase'
 import { runUnderwriting, calculatePremium } from '../lib/underwriting'
 import Layout from '../components/Layout'
 
-const STEPS = appType === 'renewal'
-  ? ['Application Type', 'Firm Information', 'Paralegals', 'Services', 'Business Practice', 'Loss Experience', 'Coverage Selection', 'Review & Submit']
-  : ['Application Type', 'Firm Information', 'Paralegals', 'Services', 'Business Practice', 'Prior Insurance', 'Loss Experience', 'Coverage Selection', 'Review & Submit']
-
+const STEPS = [
+  'Application Type',
+  'Firm Information',
+  'Paralegals',
+  'Services',
+  'Business Practice',
+  'Prior Insurance',
+  'Loss Experience',
+  'Coverage Selection',
+  'Review & Submit',
+]
 const YN = ({ value, onChange }) => (
   <div className="yn">
     <button type="button" className={`yn-btn ${value === true ? 'yes' : ''}`} onClick={() => onChange(value === true ? null : true)}>Yes</button>
@@ -715,7 +722,8 @@ export default function NewApplication() {
 
       <div>
         <div className="step-indicators">
-          {STEPS.map((s, i) => (
+          const visibleSteps = appType === 'renewal' ? STEPS.filter(s => s !== 'Prior Insurance') : STEPS
+          {visibleSteps.map((s, i) => (
             <div key={i} className={`step-ind ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`}>
               <span className="step-num">{i < step ? '✓' : i + 1}</span>
               {s}
@@ -729,7 +737,7 @@ export default function NewApplication() {
           <button type="button" className="btn btn-ghost" onClick={() => { const n = step + 1; setStep(appType === 'renewal' && n === 5 ? 6 : n); setError('') }} disabled={step === 0 || (step === 8 && runUnderwriting(appData, paralegalCount, coverages).decision === 'referred')}>
             ← Previous
           </button>
-          {step < STEPS.length - 1 ? (
+          {step < visibleSteps.length - 1 ? (
             <button type="button" className="btn btn-primary" onClick={() => { const n = step + 1; setStep(appType === 'renewal' && n === 5 ? 6 : n); setError('') }}>
               Next →
             </button>
