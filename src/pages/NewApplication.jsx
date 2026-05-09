@@ -683,7 +683,7 @@ export default function NewApplication() {
                 <h4 style={{ fontFamily: 'Cormorant Garamond', fontSize: 20, fontWeight: 500, color: 'var(--navy)', marginBottom: '1rem' }}>
                   Your premium quote
                 </h4>
-                <div className="q-line"><span>E&O Coverage ({paralegalCount} paralegal{paralegalCount > 1 ? 's' : ''} · {isOPAMember ? 'OPA member' : 'Non-OPA'} · {rateCategory === 'new_no_experience' ? 'New' : 'Experienced/Renewal'})</span><span>${q.eo_base_premium?.toLocaleString()}</span></div>
+                <div className="q-line"><span>E&O Coverage ({paralegalCount} paralegal{paralegalCount > 1 ? 's' : ''} · {isOPAMember ? 'OPA member' : 'Non-OPA'} · {rateCategory === 'new_no_experience' ? 'New' : 'Experienced'})</span><span>${q.eo_base_premium?.toLocaleString()}</span></div>
                 {q.family_law_surcharge > 0 && <div className="q-line"><span>Family Law surcharge (25%)</span><span>+${q.family_law_surcharge?.toLocaleString()}</span></div>}
                 {q.mediation_premium > 0 && <div className="q-line"><span>Mediation Services</span><span>+${q.mediation_premium}</span></div>}
                 {q.third_party_bond_premium > 0 && <div className="q-line"><span>Third Party Bond</span><span>+${q.third_party_bond_premium}</span></div>}

@@ -97,7 +97,7 @@ export default function ApplicationDetail() {
         <div className="alert alert-success">
           <strong>✓ Policy Active</strong>
           <p style={{ marginTop: 6, fontSize: 13 }}>
-            Policy <strong>{policy.policy_number}</strong> is active from {new Date(policy.effective_date).toLocaleDateString('en-CA')} to {new Date(policy.expiry_date).toLocaleDateString('en-CA')}.
+            Policy <strong>{policy.policy_number}</strong> is active from {new Date(policy.effective_date + 'T12:00:00').toLocaleDateString('en-CA')} to {new Date(policy.expiry_date + 'T12:00:00').toLocaleDateString('en-CA')}.
           </p>
         </div>
       )}
@@ -148,13 +148,13 @@ export default function ApplicationDetail() {
                 <div>
                   <div style={{ fontSize: 11, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Effective</div>
                   <div style={{ fontSize: 15, fontWeight: 500, marginTop: 4 }}>
-                    {app.effective_date ? new Date(app.effective_date).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
+                    {app.effective_date ? new Date(app.effective_date + 'T12:00:00').toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
                   </div>
                 </div>
                 <div>
                   <div style={{ fontSize: 11, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Expiry</div>
                   <div style={{ fontSize: 15, fontWeight: 500, marginTop: 4 }}>
-                    {app.expiry_date ? new Date(app.expiry_date).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
+                    {app.expiry_date ? new Date(app.expiry_date + 'T12:00:00').toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
                   </div>
                 </div>
               </div>
