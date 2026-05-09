@@ -106,7 +106,7 @@ export default function CertificateGenerator({ application, policy, quote }) {
 
       function wrapRow(lbl, text, yp) {
         const lines = doc.splitTextToSize(text, contentW - 52)
-        const h = lines.length * 4.5 + 4
+        const h = lines.length * 5 + 6
         doc.setFillColor(245, 246, 248)
         doc.rect(col1, yp - 4, contentW, h, 'F')
         doc.setDrawColor(220, 220, 225)
