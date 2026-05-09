@@ -735,7 +735,7 @@ export default function NewApplication() {
         {renderStep()}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-          <button type="button" className="btn btn-ghost" onClick={() => { const n = step + 1; setStep(appType === 'renewal' && n === 5 ? 6 : n); setError('') }} disabled={step === 0 || (step === 8 && runUnderwriting(appData, paralegalCount, coverages).decision === 'referred')}>
+          <button type="button" className="btn btn-ghost" onClick={() => { const p = step - 1; setStep(appType === 'renewal' && p === 5 ? 4 : p); setError('') }} disabled={step === 0 || (step === 8 && runUnderwriting(appData, paralegalCount, coverages).decision === 'referred')}>
             ← Previous
           </button>
           {step < visibleSteps.length - 1 ? (
