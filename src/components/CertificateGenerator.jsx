@@ -13,10 +13,10 @@ export default function CertificateGenerator({ application, policy, quote }) {
       const paralegals = (application.application_paralegals || []).map(ap => ap.paralegals).filter(Boolean)
 
       const effectiveDate = policy?.effective_date
-        ? new Date(policy.effective_date).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
+        ? new Date(policy.effective_date + 'T12:00:00').toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
         : '—'
       const expiryDate = policy?.expiry_date
-        ? new Date(policy.expiry_date).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
+        ? new Date(policy.expiry_date + 'T12:00:00').toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
         : '—'
       const issueDate = new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
       const certNumber = policy?.certificate_number || policy?.policy_number || '—'
