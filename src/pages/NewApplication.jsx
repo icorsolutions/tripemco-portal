@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { runUnderwriting, calculatePremium } from '../lib/underwriting'
 import Layout from '../components/Layout'
+import RenewalLookup from '../components/RenewalLookup'
 
 const STEPS = [
   'Application Type',
@@ -101,7 +102,75 @@ export default function NewApplication() {
     wants_cgl: false, cgl_limit: 1000000,
     wants_privacy_breach_upgrade: false, privacy_breach_limit: 5000,
   })
+function prefillFromPolicy({ policy, app, firm }) {
+    // Pre-fill firm
+    setFirm({
+      firm_name: firm.firm_name || '',
+      operating_name: firm.operating_name || '',
+      business_form: firm.business_form || 'sole_proprietorship',
+      website: firm.website || '',
+      is_opa_member: firm.is_opa_member ?? null,
+      opa_membership_number: firm.opa_membership_number || '',
+      operations_start_date: firm.operations_start_date || '',
+      office_type: firm.office_type || 'home',
+      address_line1: firm.address_line1 || '',
+      address_line2: firm.address_line2 || '',
+      city: firm.city || '',
+      province: firm.province || 'Ontario',
+      postal_code: firm.postal_code || '',
+      branch_address_1: firm.branch_address_1 || '',
+      other_legal_entities: firm.other_legal_entities || false,
+    })
 
+    // Pre-fill paralegals
+    const pars = (app.application_paralegals || []).map(ap => ({
+      full_name: ap.paralegals?.full_name || '',
+      lso_license_number: ap.paralegals?.lso_license_number || '',
+      title_and_duties: ap.paralegals?.title_and_duties || 'Paralegal',
+      education: ap.paralegals?.education || '',
+      years_experience: ap.paralegals?.years_experience || '',
+      is_opa_member: ap.paralegals?.is_opa_member ?? null,
+      opa_membership_number: ap.paralegals?.opa_membership_number || '',
+      retroactive_date_agreed: null, // Must be re-confirmed each renewal
+    }))
+    if (pars.length > 0) setParalegals(pars)
+
+    // Pre-fill coverages
+    const cov = app.coverages?.[0]
+    if (cov) {
+      setCov(c => ({
+        ...c,
+        wants_mediation: cov.wants_mediation || false,
+        wants_notary: cov.wants_notary || false,
+        wants_third_party_bond: cov.wants_third_party_bond || false,
+        wants_cgl: cov.wants_cgl || false,
+        cgl_limit: cov.cgl_limit || 1000000,
+        wants_privacy_breach_upgrade: cov.wants_privacy_breach_upgrade || false,
+        privacy_breach_limit: cov.privacy_breach_limit || 5000,
+      }))
+    }
+
+    // Pre-fill services from prior application
+    setServices(s => ({
+      ...s,
+      provides_immigration: app.provides_immigration ?? null,
+      provides_notary: app.provides_notary ?? null,
+      provides_mediation: app.provides_mediation ?? null,
+      provides_family_law: app.provides_family_law ?? null,
+      provides_sabs: app.provides_sabs ?? null,
+      provides_other_services: app.provides_other_services ?? null,
+      offices_outside_canada: app.offices_outside_canada ?? null,
+      hires_subcontractors: app.hires_subcontractors ?? null,
+      employee_count: app.employee_count || 1,
+      contractor_count: app.contractor_count || 0,
+    }))
+
+    // Store prior policy number
+    setPriorPolicyNumber(policy.policy_number)
+
+    // Advance to next step
+    setStep(1)
+  }
   const setFirmField = (k, v) => setFirm(f => ({ ...f, [k]: v }))
   const setSvcField = (k, v) => {
     setServices(s => ({ ...s, [k]: v }))
@@ -231,9 +300,7 @@ export default function NewApplication() {
             ))}
           </div>
           {appType === 'renewal' && (
-            <Field label="Prior policy number" hint="Found on your previous certificate of insurance">
-              <input type="text" value={priorPolicyNumber} onChange={e => setPriorPolicyNumber(e.target.value)} placeholder="e.g. TRP-2025-00377" />
-            </Field>
+            <RenewalLookup onFound={prefillFromPolicy} />
           )}
         </div>
       )
