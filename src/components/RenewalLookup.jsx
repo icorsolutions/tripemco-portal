@@ -1,5 +1,3 @@
-// RenewalLookup.jsx
-// Drop this into src/components/RenewalLookup.jsx
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
@@ -16,77 +14,106 @@ export default function RenewalLookup({ onFound }) {
     setFound(null)
 
     try {
-      // Search by policy number first
-      let { data: policies } = await supabase
+      let policy = null
+      let app = null
+      let firm = null
+
+      // Step 1: Find policy by number or firm name
+      const cleanQuery = query.trim()
+
+      // Try by policy number first
+      const { data: pols } = await supabase
         .from('policies')
-        .select(`
-          *,
-          applications(
-            *,
-            firms(*),
-            application_paralegals(*, paralegals(*)),
-            coverages(*)
-          )
-        `)
-        .ilike('policy_number', query.trim())
+        .select('*')
+        .ilike('policy_number', cleanQuery)
         .eq('status', 'active')
         .limit(1)
 
-      // If not found by policy number, try firm name
-      if (!policies || policies.length === 0) {
+      if (pols && pols.length > 0) {
+        policy = pols[0]
+      } else {
+        // Try by firm name
         const { data: firms } = await supabase
           .from('firms')
-          .select('id, firm_name')
-          .ilike('firm_name', query.trim())
+          .select('id')
+          .ilike('firm_name', cleanQuery)
           .limit(5)
 
         if (firms && firms.length > 0) {
           const firmIds = firms.map(f => f.id)
-          const { data: appsByFirm } = await supabase
+          const { data: apps } = await supabase
             .from('applications')
-            .select(`
-              *,
-              firms(*),
-              application_paralegals(*, paralegals(*)),
-              coverages(*)
-            `)
+            .select('id')
             .in('firm_id', firmIds)
             .eq('status', 'bound')
             .order('created_at', { ascending: false })
             .limit(1)
 
-          if (appsByFirm && appsByFirm.length > 0) {
-            // Get the policy for this application
-            const { data: pol } = await supabase
+          if (apps && apps.length > 0) {
+            const { data: polByApp } = await supabase
               .from('policies')
               .select('*')
-              .eq('application_id', appsByFirm[0].id)
+              .eq('application_id', apps[0].id)
               .eq('status', 'active')
-              .single()
+              .limit(1)
 
-            if (pol) {
-              policies = [{ ...pol, applications: [appsByFirm[0]] }]
+            if (polByApp && polByApp.length > 0) {
+              policy = polByApp[0]
             }
           }
         }
       }
 
-      if (!policies || policies.length === 0) {
-        setError('No active policy found. Please check the policy number or firm name and try again. It must match exactly as shown on your certificate.')
+      if (!policy) {
+        setError('No active policy found. Please check the policy number or firm name — it must match exactly as shown on your certificate.')
         return
       }
 
-      const policy = policies[0]
-      const app = policy.applications?.[0]
-      const firm = app?.firms
+      // Step 2: Get the application
+      const { data: appData } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('id', policy.application_id)
+        .single()
 
-      if (!app || !firm) {
-        setError('Policy found but unable to retrieve full details. Please contact Tripemco at (800) 461-5083.')
+      if (!appData) {
+        setError('Policy found but application details could not be retrieved. Please contact Tripemco at (800) 461-5083.')
         return
       }
+      app = appData
+
+      // Step 3: Get the firm
+      const { data: firmData } = await supabase
+        .from('firms')
+        .select('*')
+        .eq('id', app.firm_id)
+        .single()
+
+      if (!firmData) {
+        setError('Policy found but firm details could not be retrieved. Please contact Tripemco at (800) 461-5083.')
+        return
+      }
+      firm = firmData
+
+      // Step 4: Get paralegals
+      const { data: appParalegals } = await supabase
+        .from('application_paralegals')
+        .select('*, paralegals(*)')
+        .eq('application_id', app.id)
+
+      // Step 5: Get coverages
+      const { data: coverages } = await supabase
+        .from('coverages')
+        .select('*')
+        .eq('application_id', app.id)
+        .limit(1)
+
+      app.application_paralegals = appParalegals || []
+      app.coverages = coverages || []
 
       setFound({ policy, app, firm })
     } catch (e) {
+      console.error('Lookup error:', e)
       setError('Lookup failed. Please try again or contact Tripemco at (800) 461-5083.')
     } finally {
       setLoading(false)
@@ -111,16 +138,10 @@ export default function RenewalLookup({ onFound }) {
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && lookup()}
-          placeholder="Policy number (e.g. TRP-MOXB1YN9) or firm name"
+          placeholder="Policy number or firm name"
           style={{ flex: 1 }}
         />
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={lookup}
-          disabled={loading}
-          style={{ flexShrink: 0 }}
-        >
+        <button type="button" className="btn btn-primary" onClick={lookup} disabled={loading} style={{ flexShrink: 0 }}>
           {loading ? <><span className="spinner" style={{ width: 16, height: 16 }} /> Looking up…</> : 'Look up policy'}
         </button>
       </div>
@@ -129,12 +150,24 @@ export default function RenewalLookup({ onFound }) {
 
       {found && (
         <div style={{ background: 'var(--gl)', border: '1px solid #b8dece', borderRadius: 'var(--r)', padding: '1.25rem' }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--green2)', marginBottom: '0.75rem' }}>✓ Policy found — confirm your details below</p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--green2)', marginBottom: '0.75rem' }}>✓ Policy found — please confirm your details</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 14, marginBottom: '1rem' }}>
-            <div><span style={{ color: 'var(--text2)', fontSize: 12 }}>Named Insured</span><br /><strong>{found.firm?.firm_name}</strong></div>
-            <div><span style={{ color: 'var(--text2)', fontSize: 12 }}>Policy Number</span><br /><strong>{found.policy?.policy_number}</strong></div>
-            <div><span style={{ color: 'var(--text2)', fontSize: 12 }}>Expiry Date</span><br /><strong>{found.policy?.expiry_date ? new Date(found.policy.expiry_date + 'T12:00:00').toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'}</strong></div>
-            <div><span style={{ color: 'var(--text2)', fontSize: 12 }}>Paralegals</span><br /><strong>{(found.app?.application_paralegals || []).map(ap => ap.paralegals?.full_name).filter(Boolean).join(', ') || '—'}</strong></div>
+            <div>
+              <div style={{ color: 'var(--text2)', fontSize: 12, marginBottom: 2 }}>Named Insured</div>
+              <strong>{found.firm?.firm_name}</strong>
+            </div>
+            <div>
+              <div style={{ color: 'var(--text2)', fontSize: 12, marginBottom: 2 }}>Policy Number</div>
+              <strong>{found.policy?.policy_number}</strong>
+            </div>
+            <div>
+              <div style={{ color: 'var(--text2)', fontSize: 12, marginBottom: 2 }}>Expiry Date</div>
+              <strong>{found.policy?.expiry_date ? new Date(found.policy.expiry_date + 'T12:00:00').toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'}</strong>
+            </div>
+            <div>
+              <div style={{ color: 'var(--text2)', fontSize: 12, marginBottom: 2 }}>Paralegals</div>
+              <strong>{(found.app?.application_paralegals || []).map(ap => ap.paralegals?.full_name).filter(Boolean).join(', ') || '—'}</strong>
+            </div>
           </div>
           <button type="button" className="btn btn-primary" onClick={confirm}>
             Confirm & pre-fill renewal →
