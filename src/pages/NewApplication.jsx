@@ -56,11 +56,11 @@ export default function NewApplication() {
   }])
 
   const [services, setServices] = useState({
-    employee_count: 1, contractor_count: 0, hires_subcontractors: false,
-    provides_immigration: false, immigration_iccrc_compliant: null, provides_notary: false, provides_mediation: false,
+    employee_count: 1, contractor_count: 0, hires_subcontractors: null,
+    provides_immigration: null, immigration_iccrc_compliant: null, provides_notary: null, provides_mediation: null,
     mediation_certified: null, mediation_hours_completed: '', mediation_revenue_pct: '',
-    provides_family_law: false, provides_sabs: false, provides_other_services: false,
-    other_services_description: '', offices_outside_canada: false,
+    provides_family_law: null, provides_sabs: null, provides_other_services: null,
+    other_services_description: '', offices_outside_canada: null,
     current_revenue: '', prior_revenue: '',
   })
 
