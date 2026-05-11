@@ -241,22 +241,22 @@ function prefillFromPolicy({ policy, app, firm }) {
       )
       await supabase.from('coverages').insert({ application_id: appRecord.id, ...coverages })
 
-    if (quote) {
+    if (freshQuote) {
   await supabase.from('quotes').insert({
     application_id: appRecord.id,
-    eo_base_premium: quote.eo_base_premium,
-    family_law_surcharge: quote.family_law_surcharge || 0,
-    mediation_premium: quote.mediation_premium || 0,
-    third_party_bond_premium: quote.third_party_bond_premium || 0,
-    cgl_premium: quote.cgl_premium || 0,
-    privacy_breach_premium: quote.privacy_breach_premium || 0,
-    provincial_premium_tax: quote.provincial_tax || 0,
-    provincial_tax: quote.provincial_tax || 0,
-    subtotal: quote.subtotal,
-    total_premium: quote.total_premium,
-    is_opa_rate: quote.is_opa_rate,
-    paralegal_count: quote.paralegal_count,
-    rate_category: quote.rate_category,
+    eo_base_premium: freshQuote.eo_base_premium,
+    family_law_surcharge: freshQuote.family_law_surcharge || 0,
+    mediation_premium: freshQuote.mediation_premium || 0,
+    third_party_bond_premium: freshQuote.third_party_bond_premium || 0,
+    cgl_premium: freshQuote.cgl_premium || 0,
+    privacy_breach_premium: freshQuote.privacy_breach_premium || 0,
+    provincial_premium_tax: freshQuote.provincial_tax || 0,
+    provincial_tax: freshQuote.provincial_tax || 0,
+    subtotal: freshQuote.subtotal,
+    total_premium: freshQuote.total_premium,
+    is_opa_rate: freshQuote.is_opa_rate,
+    paralegal_count: freshQuote.paralegal_count,
+    rate_category: freshQuote.rate_category,
   })
 }
 
@@ -716,6 +716,7 @@ function prefillFromPolicy({ policy, app, firm }) {
 
       case 8: {
         const uw = runUnderwriting(appData, paralegalCount, coverages)
+        const freshQuote = uw.decision === 'quoted' ? calculatePremium({ isOPAMember, paralegalCount, rateCategory, application: appData, coverages }) : null
         const q = uw.decision === 'quoted' ? calculatePremium({ isOPAMember, paralegalCount, rateCategory, application: appData, coverages }) : null
 
         return (
