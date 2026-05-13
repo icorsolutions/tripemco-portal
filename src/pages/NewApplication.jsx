@@ -1,3 +1,4 @@
+import { todayInputValue, addYears, toDateInputValue } from '../lib/dates'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -97,7 +98,7 @@ export default function NewApplication() {
 
   const [coverages, setCov] = useState({
     eo_limit_per_claim: 1000000, eo_aggregate_limit: 2000000, eo_deductible: 1500,
-    effective_date: new Date().toISOString().split('T')[0],
+    effective_date: todayInputValue(),
     wants_mediation: false, wants_notary: false, wants_third_party_bond: false,
     wants_cgl: false, cgl_limit: 1000000,
     wants_privacy_breach_upgrade: false, privacy_breach_limit: 5000,
@@ -136,6 +137,9 @@ function prefillFromPolicy({ policy, app, firm }) {
     if (pars.length > 0) setParalegals(pars)
 
     // Pre-fill coverages
+    if (policy.expiry_date) {
+      setCov(c => ({ ...c, effective_date: toDateInputValue(policy.expiry_date) }))
+    }
     const cov = app.coverages?.[0]
     if (cov) {
       setCov(c => ({
@@ -231,8 +235,8 @@ function prefillFromPolicy({ policy, app, firm }) {
         ...priorIns,
         ...lossExp,
         retroactive_date_agreed: paralegals.every(p => p.retroactive_date_agreed === true),
-        effective_date: coverages.effective_date || new Date().toISOString().split('T')[0],
-        expiry_date: new Date(new Date(coverages.effective_date || Date.now()).getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        effective_date: coverages.effective_date || todayInputValue(),
+        expiry_date: addYears(coverages.effective_date || todayInputValue(), 1),
       }).select().single()
       if (appErr) throw appErr
 
@@ -626,8 +630,8 @@ function prefillFromPolicy({ policy, app, firm }) {
           <h2 className="step-title">Coverage selection</h2>
           <p className="step-sub">All policies include E&O, Identity Fraud Expense ($5,000), and a 90-day Extended Reporting Period as standard.</p>
           <Field label="Coverage effective date" required hint="Must be today or a future date — backdating is not permitted">
-  <input type="date" value={coverages.effective_date || ''} min={new Date().toISOString().split('T')[0]}
-    onChange={e => { if (e.target.value >= new Date().toISOString().split('T')[0]) setCovField('effective_date', e.target.value) }} />
+  <input type="date" value={coverages.effective_date || ''} min={todayInputValue()}
+    onChange={e => { if (e.target.value >= todayInputValue()) setCovField('effective_date', e.target.value) }} />
 </Field>
 
           <div className="card" style={{ marginBottom: '1rem', background: 'rgba(26,39,68,0.04)', borderColor: 'rgba(26,39,68,0.15)' }}>
