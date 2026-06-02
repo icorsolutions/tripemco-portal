@@ -60,9 +60,9 @@ export async function generateBordereau({ fromDate, toDate }) {
     const app = policy.applications
     if (!app) continue
     const firm = app.firms
-    const cov = (app.coverages || [])[0]
+    const cov = (app.coverages || [])[0] || {}
     const quote = (app.quotes || [])[0]
-    if (!firm || !cov || !quote) continue
+    if (!firm || !quote) continue
 
     const eoBase = Number(quote.eo_base_premium || 0)
     const familyLaw = Number(quote.family_law_surcharge || 0)
