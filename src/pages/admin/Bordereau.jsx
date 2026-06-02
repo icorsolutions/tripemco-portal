@@ -1,8 +1,8 @@
 // src/pages/AdminBordereau.jsx
 import { useState } from 'react'
-import Layout from '../components/Layout'
-import { generateBordereau } from '../lib/bordereau'
-import { todayInputValue } from '../lib/dates'
+import Layout from '../../components/Layout'
+import { generateBordereau } from '../../lib/bordereau'
+import { todayInputValue } from '../../lib/dates'
 
 function firstOfThisMonth() {
   const d = new Date()

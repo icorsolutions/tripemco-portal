@@ -1,7 +1,7 @@
 // src/pages/AdminSettings.jsx
 import { useEffect, useState } from 'react'
-import Layout from '../components/Layout'
-import { getProgramConfig, updateProgramConfig } from '../lib/programConfig'
+import Layout from '../../components/Layout'
+import { getProgramConfig, updateProgramConfig } from '../../lib/programConfig'
 
 const FIELD_META = {
   master_policy_no: { label: 'Master Policy No', hint: 'Appears on every bordereau row (e.g. MP000005)' },
