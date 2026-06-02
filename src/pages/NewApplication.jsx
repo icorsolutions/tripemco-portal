@@ -243,7 +243,20 @@ function prefillFromPolicy({ policy, app, firm }) {
       await supabase.from('application_paralegals').insert(
         paralegalIds.map(pid => ({ application_id: appRecord.id, paralegal_id: pid }))
       )
-      await supabase.from('coverages').insert({ application_id: appRecord.id, ...coverages })
+      const { error: covErr } = await supabase.from('coverages').insert({
+        application_id: appRecord.id,
+        eo_limit_per_claim: coverages.eo_limit_per_claim,
+        eo_aggregate_limit: coverages.eo_aggregate_limit,
+        eo_deductible: coverages.eo_deductible,
+        wants_mediation: coverages.wants_mediation,
+        wants_notary: coverages.wants_notary,
+        wants_third_party_bond: coverages.wants_third_party_bond,
+        wants_cgl: coverages.wants_cgl,
+        cgl_limit: coverages.cgl_limit,
+        wants_privacy_breach_upgrade: coverages.wants_privacy_breach_upgrade,
+        privacy_breach_limit: coverages.privacy_breach_limit,
+      })
+      if (covErr) throw covErr
 
     if (freshQuote) {
   await supabase.from('quotes').insert({
