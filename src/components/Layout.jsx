@@ -10,6 +10,8 @@ const ADMIN_NAV = [
   { to: '/admin', label: 'Overview', icon: '▦' },
   { to: '/admin/applications', label: 'Applications', icon: '◧' },
   { to: '/admin/users', label: 'Users', icon: '◉' },
+  { to: '/admin/bordereau', label: 'Bordereau', icon: '▤' },
+  { to: '/admin/settings', label: 'Settings', icon: '◐' },
 ]
 
 export default function Layout({ children }) {
