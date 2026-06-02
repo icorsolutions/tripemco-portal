@@ -7,6 +7,8 @@ import CustomerApplications from './pages/customer/Applications'
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminApplications from './pages/admin/Applications'
 import AdminUsers from './pages/admin/Users'
+import AdminSettings from './pages/admin/Settings'
+import AdminBordereau from './pages/admin/Bordereau'
 import ApplicationDetail from './pages/ApplicationDetail'
 import NewApplication from './pages/NewApplication'
 import './index.css'
@@ -61,6 +63,8 @@ export default function App() {
           <Route path="/admin/applications" element={<Guard adminOnly><AdminApplications /></Guard>} />
           <Route path="/admin/applications/:id" element={<Guard adminOnly><ApplicationDetail /></Guard>} />
           <Route path="/admin/users" element={<Guard adminOnly><AdminUsers /></Guard>} />
+          <Route path="/admin/settings" element={<Guard adminOnly><AdminSettings /></Guard>} />
+          <Route path="/admin/bordereau" element={<Guard adminOnly><AdminBordereau /></Guard>} />
 
           {/* Catch all */}
           <Route path="*" element={<Navigate to="/" replace />} />
