@@ -36,6 +36,6 @@ export default async function handler(req, res) {
     const t2 = await r2.text()
     if (!r2.ok) return res.status(502).json({ error: 'Session failed', status: r2.status, detail: t2 })
     const session = JSON.parse(t2)
-    return res.status(200).json({ sessionId: session.id || session.sessionId })
+    return res.status(200).json({ sessionId: session.id || session.sessionId, orderId: order.id })
   } catch(e) { return res.status(500).json({ error: e.message }) }
 }

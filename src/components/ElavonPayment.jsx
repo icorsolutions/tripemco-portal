@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { toDateInputValue, todayInputValue, addYears } from '../lib/dates'
 
 const PK = 'pk_h9w3pwbpyrvddfhmdm498bxtfgq9'
 const SCRIPT = 'https://uat.hpp.converge.eu.elavonaws.com/client/library.js'
@@ -29,6 +30,7 @@ export default function ElavonPayment({ application, quote, onSuccess }) {
       if (!r.ok) { const e = await r.json(); throw new Error(e.error) }
       const res = await r.json()
       const sid = res.sessionId
+      const oid = res.orderId
       const lb = new window.ElavonLightbox({
         sessionId: sid,
         publicKey: PK,
@@ -40,8 +42,8 @@ export default function ElavonPayment({ application, quote, onSuccess }) {
   console.log('Elavon message received:', JSON.stringify(msg))
   const successTypes = ['transactionCreated', 'TRANSACTION_CREATED', 'sale', 'success']
   if (msg.type === 'handleToken' || msg.sessionId) {
-    const eff = application.effective_date || new Date().toISOString().split('T')[0]
-const exp = new Date(new Date(eff).getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    const eff = toDateInputValue(application.effective_date) || todayInputValue()
+const exp = addYears(eff, 1)
     const { data: pol } = await supabase.from('policies').insert({
       application_id: application.id,
       firm_id: application.firm_id,
@@ -57,6 +59,8 @@ const exp = new Date(new Date(eff).getTime() + 365 * 24 * 60 * 60 * 1000).toISOS
       policy_id: pol?.id,
       amount: quote.total_premium,
       currency: 'CAD',
+      payment_provider: 'elavon',
+      provider_payment_id: oid,
       status: 'succeeded',
       payment_method: 'credit_card',
       transaction_id: msg.sessionId,
