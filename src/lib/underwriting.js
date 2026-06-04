@@ -159,7 +159,7 @@ export function calculatePremium({ isOPAMember, paralegalCount, rateCategory, ap
   let base = 0
   if (paralegalCount === 1) base = r[1]
   else if (paralegalCount === 2) base = r[2]
-  else base = r.additional * paralegalCount
+  else base = r[2] + r.additional * (paralegalCount - 2)
 
   // Minimum premium
   base = Math.max(base, 300)
@@ -193,4 +193,21 @@ export function calculatePremium({ isOPAMember, paralegalCount, rateCategory, ap
     paralegal_count: paralegalCount,
     rate_category: rateCategory,
   }
+}
+
+// === Endorsement helpers ===
+
+export function calculateBasePremiumForCount(isOPAMember, rateCategory, count) {
+  if (count <= 0) return 0
+  const rates = isOPAMember ? OPA_RATES : NON_OPA_RATES
+  const r = rates[rateCategory] || rates.experienced_or_renewal
+  if (count === 1) return r[1]
+  if (count === 2) return r[2]
+  return r[2] + r.additional * (count - 2)
+}
+
+export function paralegalCountPremiumDelta(isOPAMember, rateCategory, countBefore, countAfter) {
+  const before = calculateBasePremiumForCount(isOPAMember, rateCategory, countBefore)
+  const after = calculateBasePremiumForCount(isOPAMember, rateCategory, countAfter)
+  return Math.abs(after - before)
 }
