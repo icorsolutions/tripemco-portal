@@ -220,6 +220,7 @@ function prefillFromPolicy({ policy, app, firm }) {
       const paralegalIds = paralegalRecords.map(r => r.data.id)
 
       const uw = runUnderwriting(appData, paralegalCount, coverages)
+      const freshQuote = uw.decision === 'quoted' ? calculatePremium({ isOPAMember, paralegalCount, rateCategory, application: appData, coverages }) : null
 
       const { data: appRecord, error: appErr } = await supabase.from('applications').insert({
         firm_id: firmData.id,
