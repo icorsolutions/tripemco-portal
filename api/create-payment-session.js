@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
-  const { amount, applicationId, firmName } = req.body
+  const { amount, applicationId, firmName, originUrl } = req.body
   if (!amount || !applicationId) return res.status(400).json({ error: 'Missing fields' })
   const BASE = process.env.ELAVON_API_URL || 'https://uat.api.converge.eu.elavonaws.com'
   const SK = process.env.ELAVON_SECRET_KEY
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
       headers: { 'Content-Type': 'application/json', 'Authorization': auth },
       body: JSON.stringify({
         hppType: 'lightbox',
-        originUrl: 'https://tripemco-portal-ciw5.vercel.app',
+        originUrl: originUrl || 'https://tripemco-portal-ciw5.vercel.app',
         order: orderHref,
         doCreateTransaction: true,
         doCapture: true,

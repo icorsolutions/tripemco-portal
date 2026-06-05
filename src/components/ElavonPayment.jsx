@@ -25,7 +25,7 @@ export default function ElavonPayment({ application, quote, onSuccess }) {
       const r = await fetch('/api/create-payment-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: quote.total_premium, applicationId: application.id, firmName: application.firms?.firm_name })
+        body: JSON.stringify({ amount: quote.total_premium, applicationId: application.id, firmName: application.firms?.firm_name, originUrl: window.location.origin })
       })
       if (!r.ok) { const e = await r.json(); throw new Error(e.error) }
       const res = await r.json()
