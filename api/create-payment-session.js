@@ -31,6 +31,8 @@ export default async function handler(req, res) {
         hppType: 'lightbox',
         originUrl: 'https://tripemco-portal-ciw5.vercel.app',
         order: orderHref,
+        doCreateTransaction: true,
+        doCapture: true,
       }),
     })
     const t2 = await r2.text()
