@@ -35,7 +35,7 @@ export default function ElavonPayment({ application, quote, onSuccess }) {
         sessionId: sid,
         publicKey: PK,
         onReady: (e) => {
-          if (e) { setError('Payment form error'); setLoading(false) }
+          if (e) { console.error('Elavon onReady error:', e); setError('Payment form error: ' + JSON.stringify(e)); setLoading(false) }
           else { lb.show(); setLoading(false) }
         },
         messageHandler: async (msg, def) => {
