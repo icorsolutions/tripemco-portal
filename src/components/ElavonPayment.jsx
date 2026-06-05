@@ -41,7 +41,7 @@ export default function ElavonPayment({ application, quote, onSuccess }) {
         messageHandler: async (msg, def) => {
   console.log('Elavon message received:', JSON.stringify(msg))
   const successTypes = ['transactionCreated', 'TRANSACTION_CREATED', 'sale', 'success']
-  if (msg.type === 'transactionCreated') {
+  if (msg.type === 'handleTransaction' || msg.type === 'transactionCreated') {
     const eff = toDateInputValue(application.effective_date) || todayInputValue()
 const exp = addYears(eff, 1)
     const { data: pol } = await supabase.from('policies').insert({
